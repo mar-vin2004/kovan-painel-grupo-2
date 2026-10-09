@@ -484,7 +484,12 @@
         var pred = preditorEstatico.predict(recencia, freq_calc, receita_calc, c.persona);
         if (pred.success) {
             c.escore = pred.probability;
-            c.valor_esperado = receita_calc * c.escore;
+            // Só lança a receita em risco se o modelo apontar + de 50% de chance de churn
+            if (c.escore > 0.5) {
+                c.valor_esperado = receita_calc * c.escore;
+            } else {
+                c.valor_esperado = 0; // Conta segura, não afeta o NRR negativamente
+            }
         }
       });
       
