@@ -323,33 +323,63 @@
   (function () {
     "use strict";
 
+    // ========================================================================
+    // 1. MOTOR DE INFERÊNCIA ESTÁTICO (SEU MODELO TREINADO)
+    // ========================================================================
+    class KovanChurnPredictor {
+        constructor() {
+            this.means = { recencia_meses: 11.349827285343144, freq_dias: 10.124044180118947, receita_anualizada: 215475.0164111122 };
+            this.scales = { recencia_meses: 10.156088159448846, freq_dias: 28.04602949118909, receita_anualizada: 2149809.4266955303 };
+            this.intercept = -0.5237323806152685;
+            this.coef = { recencia_meses: 0.928336560276413, freq_dias: -2.249459333326394, receita_anualizada: -0.40864330054487336, P2: -0.1333812165971886, P3: 0.24775806081567536, P4: 0.4616313492113473 };
+            this.validPersonas = new Set(['P1', 'P2', 'P3', 'P4']);
+        }
+        _validateInputs(recencia, freq, receita, persona) {
+            const cleanRecencia = (recencia !== undefined && recencia !== null) ? Number(recencia) : this.means.recencia_meses;
+            const cleanFreq = (freq !== undefined && freq !== null) ? Number(freq) : this.means.freq_dias;
+            const cleanReceita = (receita !== undefined && receita !== null) ? Number(receita) : this.means.receita_anualizada;
+            const cleanPersona = this.validPersonas.has(persona) ? persona : 'P4';
+            return { cleanRecencia, cleanFreq, cleanReceita, cleanPersona };
+        }
+        predict(recenciaMeses, freqDias, receitaAnualizada, persona) {
+            try {
+                const { cleanRecencia, cleanFreq, cleanReceita, cleanPersona } = this._validateInputs(recenciaMeses, freqDias, receitaAnualizada, persona);
+                const recenciaScaled = (cleanRecencia - this.means.recencia_meses) / this.scales.recencia_meses;
+                const freqDiasScaled = (cleanFreq - this.means.freq_dias) / this.scales.freq_dias;
+                const receitaScaled = (cleanReceita - this.means.receita_anualizada) / this.scales.receita_anualizada;
+                const isP2 = cleanPersona === 'P2' ? 1 : 0;
+                const isP3 = cleanPersona === 'P3' ? 1 : 0;
+                const isP4 = cleanPersona === 'P4' ? 1 : 0;
+                const logOdds = this.intercept + (recenciaScaled * this.coef.recencia_meses) + (freqDiasScaled * this.coef.freq_dias) + (receitaScaled * this.coef.receita_anualizada) + (isP2 * this.coef.P2) + (isP3 * this.coef.P3) + (isP4 * this.coef.P4);
+                const probability = 1 / (1 + Math.exp(-logOdds));
+                return { success: true, probability: probability };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+    }
+    var preditorEstatico = new KovanChurnPredictor();
+
+    // ========================================================================
+    // 2. CONFIGURAÇÕES E PLANOS
+    // ========================================================================
     var PLANOS_FIXOS = {
       comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
       atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
-      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proactively o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
+      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proativamente o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
       personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US$ 52.827\",\"290 dias\""
     };
 
     var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
-    var AREAS = ["comercial", "atendimento", "posvendas", "personas"];
-
-    function planos() {
-      return { 
-        comercial: PLANOS_FIXOS.comercial, 
-        atendimento: PLANOS_FIXOS.atendimento,
-        "pós-vendas": PLANOS_FIXOS.posvendas, 
-        personas: PLANOS_FIXOS.personas 
-      };
-    }
+    function planos() { return { comercial: PLANOS_FIXOS.comercial, atendimento: PLANOS_FIXOS.atendimento, "pós-vendas": PLANOS_FIXOS.posvendas, personas: PLANOS_FIXOS.personas }; }
 
     var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
     var resultado = null;
     var sessao = "painel-" + Math.random().toString(36).slice(2, 10);
     var espera = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
-
     function ler(chave) { try { return localStorage.getItem(chave); } catch (e) { return null; } }
-    function gravar(chave, v) { try { localStorage.setItem(chave, v); } catch (e) { /* sem armazenamento */ } }
+    function gravar(chave, v) { try { localStorage.setItem(chave, v); } catch (e) { } }
     function esc(v) { return String(v).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
     var fmt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
     function dec(v, n) { return v.toLocaleString("pt-BR", { minimumFractionDigits: n, maximumFractionDigits: n }); }
@@ -372,8 +402,7 @@
     }
 
     function carregar(arquivo) {
-      $("nome-arquivo").className = "status";
-      $("nome-arquivo").textContent = arquivo.name;
+      $("nome-arquivo").className = "status"; $("nome-arquivo").textContent = arquivo.name;
       $("etapas").classList.add("visivel");
       ["ler", "colunas", "treino", "fila"].forEach(function (e) { etapa(e, ""); });
       etapa("ler", "ativa");
@@ -382,88 +411,97 @@
         espera(60).then(function () {
           if (typeof XLSX === "undefined") throw new Error("a biblioteca de planilha não carregou. Confira a conexão.");
           var csv = arquivo.name.toLowerCase().endsWith(".csv");
-          var wb = csv ? XLSX.read(ev.target.result, { type: "string" })
-                       : XLSX.read(new Uint8Array(ev.target.result), { type: "array", sheets: ["Dataset 1"], dense: true });
+          var wb = csv ? XLSX.read(ev.target.result, { type: "string" }) : XLSX.read(new Uint8Array(ev.target.result), { type: "array", sheets: ["Dataset 1"], dense: true });
           var aba = wb.Sheets["Dataset 1"] || wb.Sheets[wb.SheetNames[0]];
-
           linhas = XLSX.utils.sheet_to_json(aba, { defval: "", raw: true });
 
           linhas.forEach(function(l) {
             if (typeof l.periodo === "number") {
               var d = new Date(Math.round((l.periodo - 25569) * 86400 * 1000));
-              var yyyy = d.getUTCFullYear();
-              var mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-              l.periodo = yyyy + "-" + mm;
+              l.periodo = d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0");
             }
           });
 
-          var faltam = ["account_id", "periodo", "churn_label", "receita_usd", "qtd_pedidos"].filter(function (c) { return !(linhas[0] && c in linhas[0]); });
-          if (faltam.length) throw new Error("faltam as colunas " + faltam.join(", ") + ". Use a aba Dataset 1 da base do case.");
-          
-          $("nome-arquivo").className = "status ok";
-          $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
+          $("nome-arquivo").className = "status ok"; $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
           var sel = $("filtro-segmento");
           if (sel) { sel.innerHTML = '<option value="Todos">Todos</option>'; }
           
-          etapa("ler", "feita"); etapa("colunas", "ativa");
-          return espera(350);
+          etapa("ler", "feita"); etapa("colunas", "ativa"); return espera(350);
         }).then(function () {
-          etapa("colunas", "feita"); etapa("treino", "ativa");
-          return espera(350);
+          etapa("colunas", "feita"); etapa("treino", "ativa"); return espera(350);
         }).then(function () {
           calcular();
-          etapa("treino", "feita"); etapa("fila", "ativa");
-          return espera(300);
+          etapa("treino", "feita"); etapa("fila", "ativa"); return espera(300);
         }).then(function () {
           etapa("fila", "feita");
         }).catch(function (e) {
-          $("nome-arquivo").className = "status erro";
-          $("nome-arquivo").textContent = "Não consegui usar o arquivo: " + e.message;
-          $("etapas").classList.remove("visivel");
+          $("nome-arquivo").className = "status erro"; $("nome-arquivo").textContent = "Erro: " + e.message; $("etapas").classList.remove("visivel");
         });
       };
-      if (arquivo.name.toLowerCase().endsWith(".csv")) leitor.readAsText(arquivo, "utf-8");
-      else leitor.readAsArrayBuffer(arquivo);
+      if (arquivo.name.toLowerCase().endsWith(".csv")) leitor.readAsText(arquivo, "utf-8"); else leitor.readAsArrayBuffer(arquivo);
     }
 
+    // ========================================================================
+    // 3. CALCULO E INFERÊNCIA DO MODELO CUSTOMIZADO
+    // ========================================================================
     function calcular() {
       if (!linhas.length) return;
-      // ✅ Como deve ficar:
       var rCompleto = KovanModelo.rodar(linhas, linhas.length);
-
-      var sel = $("filtro-segmento");
-      if (sel && sel.options.length === 1) {
-        var segmentosPossiveis = ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"];
-        segmentosPossiveis.forEach(function(s) {
-          var opt = document.createElement("option");
-          opt.value = s; opt.textContent = s;
-          sel.appendChild(opt);
-        });
-      }
-      var seg = sel ? sel.value : "Todos";
-      var filaFiltrada = rCompleto.fila;
-      if (seg !== "Todos") {
-        filaFiltrada = filaFiltrada.filter(function(l) { return l.segment === seg; });
-      }
-      var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
-      var fila = filaFiltrada.slice(0, cap);
+      var filaBase = rCompleto.fila;
       
-      fila.forEach(function(c) {
-        var alta_receita = c.valor_em_risco >= 52827;
-        var alta_frequencia = c.meses_com_compra_12m >= 4;
+      // APLICAÇÃO DO MOTOR DE INFERÊNCIA CUSTOMIZADO
+      filaBase.forEach(function(c) {
+        var receita_calc = c.receita_12m_usd !== undefined ? c.receita_12m_usd : (c.valor_em_risco || 0);
+        var alta_receita = receita_calc >= 52827;
+        var freq_calc = c.qtd_pedidos_12m !== undefined ? c.qtd_pedidos_12m : (c.meses_com_compra_12m || 0);
+        var alta_frequencia = freq_calc >= 4;
+        
+        // Define Persona (P1 a P4)
         if (alta_receita && alta_frequencia) c.persona = "P1";
         else if (alta_receita && !alta_frequencia) c.persona = "P2";
         else if (!alta_receita && alta_frequencia) c.persona = "P3";
         else c.persona = "P4";
+        
+        var recencia = c.meses_desde_ultima_compra || 0;
+        
+        // Gera o Score da Regressão Logística Customizada
+        var pred = preditorEstatico.predict(recencia, freq_calc, receita_calc, c.persona);
+        if (pred.success) {
+            c.escore = pred.probability;
+            c.valor_esperado = receita_calc * c.escore;
+        }
       });
       
+      // Reordena a fila inteira baseada no novo modelo
+      filaBase.sort(function(a, b) { return b.valor_esperado - a.valor_esperado; });
+      
+      // Sobrescreve os pesos originais para injetar os do seu modelo no gráfico de barras
+      rCompleto.pesos = {
+          "Recência (Meses)": preditorEstatico.coef.recencia_meses,
+          "Frequência": preditorEstatico.coef.freq_dias,
+          "Receita Anual": preditorEstatico.coef.receita_anualizada,
+          "Persona P4 (Cauda)": preditorEstatico.coef.P4,
+          "Persona P3": preditorEstatico.coef.P3,
+          "Persona P2": preditorEstatico.coef.P2
+      };
+      KovanModelo.COLUNAS = Object.keys(rCompleto.pesos);
+      rCompleto.auc = 0.814; // AUC extraído da sua validação
+
+      var sel = $("filtro-segmento");
+      if (sel && sel.options.length === 1) {
+        ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"].forEach(function(s) {
+          var opt = document.createElement("option"); opt.value = s; opt.textContent = s; sel.appendChild(opt);
+        });
+      }
+      
+      var seg = sel ? sel.value : "Todos";
+      var filaFiltrada = seg !== "Todos" ? filaBase.filter(function(l) { return l.segment === seg; }) : filaBase;
+      var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
+      var fila = filaFiltrada.slice(0, cap);
+      
       resultado = {
-        contas: rCompleto.contas,
-        perdidas: rCompleto.perdidas,
-        auc: rCompleto.auc,
-        pesos: rCompleto.pesos,
-        fila: fila,
-        acertos_fila: fila.reduce(function (a, c) { return a + c.churn; }, 0),
+        contas: rCompleto.contas, perdidas: rCompleto.perdidas, auc: rCompleto.auc, pesos: rCompleto.pesos, fila: fila,
+        acertos_fila: fila.reduce(function (a, c) { return a + (c.churn ? 1 : 0); }, 0),
         valor_esperado_fila: fila.reduce(function (a, c) { return a + c.valor_esperado; }, 0)
       };
       
@@ -476,7 +514,7 @@
       $("k-acertos").textContent = r.acertos_fila + " de " + r.fila.length;
       $("k-esperado").textContent = compacto(r.valor_esperado_fila);
       
-      var receitaTotal = filaFiltrada.reduce(function(a, c) { return a + (c.valor_em_risco || 0); }, 0);
+      var receitaTotal = filaFiltrada.reduce(function(a, c) { return a + (c.receita_12m_usd || c.valor_em_risco || 0); }, 0);
       var receitaRisco = filaFiltrada.reduce(function(a, c) { return a + (c.valor_esperado || 0); }, 0);
       var receitaAnterior = filaFiltrada.reduce(function(a, c) { return a + (c.receita_12m_anterior || c.receita_12m_anterior_usd || 0); }, 0);
       var nrr = receitaAnterior > 0 ? ((receitaTotal - receitaRisco) / receitaAnterior) * 100 : 0;
@@ -487,8 +525,7 @@
       
       var topo10 = r.fila.slice(0, 10);
       var maxVal = Math.max.apply(null, topo10.map(function(x) { return x.valor_esperado; }));
-      var svgW = 600;
-      var svgH = 40 + topo10.length * 25;
+      var svgW = 600; var svgH = 40 + topo10.length * 25;
       var svgHtml = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" height="' + svgH + '" style="display: block; margin-top: 16px;">';
       svgHtml += '<text x="0" y="20" font-family="var(--fonte-texto)" font-size="14" font-weight="600" fill="var(--inteli-roxo)">Top 10 contas por valor esperado</text>';
       topo10.forEach(function(l, idx) {
@@ -500,6 +537,7 @@
       });
       svgHtml += '</svg>';
       $("grafico-topo10").innerHTML = svgHtml;
+      
       var maior = Math.max.apply(null, KovanModelo.COLUNAS.map(function (c) { return Math.abs(r.pesos[c]); }));
       $("pesos").innerHTML = KovanModelo.COLUNAS.map(function (c) {
         var v = r.pesos[c];
@@ -507,9 +545,8 @@
                "\" style=\"width:0\" data-l=\"" + (Math.abs(v) / maior * 50).toFixed(1) + "%\"></span></div><span>" +
                (v > 0 ? "+" : "") + dec(v, 2) + "</span>";
       }).join("");
-      setTimeout(function () {
-        document.querySelectorAll("#pesos .barra span").forEach(function (s) { s.style.width = s.dataset.l; });
-      }, 50);
+      setTimeout(function () { document.querySelectorAll("#pesos .barra span").forEach(function (s) { s.style.width = s.dataset.l; }); }, 50);
+      
       var cols = [["posicao", "Pos."], ["account_id", "Conta"], ["segment", "Segmento"], ["persona", "Persona"], ["escore", "Escore"],
                   ["valor_em_risco", "Receita 12m"], ["valor_esperado", "Valor esperado"],
                   ["meses_desde_ultima_compra", "Meses sem compra"], ["meses_com_compra_12m", "Meses com compra"]];
@@ -525,7 +562,7 @@
       $("tabela").innerHTML = html + "</tbody>";
       var btnExp = $("exportar-csv");
       if (btnExp) btnExp.disabled = false;
-      aviso_chat("Modelo treinado: " + fmt.format(r.contas) + " contas, AUC " + dec(r.auc, 3) + ". Fila de " + r.fila.length + " contas pronta para a equipe.");
+      aviso_chat("Seu modelo KovanChurnPredictor foi ativado. AUC fixo " + dec(r.auc, 3) + ". Fila ordenada pelo novo score.");
       trilha();
     }
     
@@ -540,19 +577,14 @@
       c.forEach(function(l) {
         var row = cols.map(function(col) {
           var val = l[col];
-          if (typeof val === "string") return '"' + val.replace(/"/g, '""') + '"';
-          return val;
+          return (typeof val === "string") ? '"' + val.replace(/"/g, '""') + '"' : val;
         });
         csvRows.push(row.join(","));
       });
       var blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
       var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "kovan_fila_exportada.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      var link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", "kovan_fila_exportada.csv");
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
     });
     
     $("tabela").addEventListener("click", function (e) {
@@ -572,19 +604,12 @@
     
     function contexto() { 
       var ctx = KovanModelo.contexto(resultado); 
+      // Formata os rótulos das personas para envio amigável ao LLM
       ctx.contas.forEach(function(c) {
-        var alta_receita = c.receita_12m_usd >= 52827;
-        var alta_frequencia = c.meses_com_compra_nos_ultimos_12 >= 4;
-        
-        if (alta_receita && alta_frequencia) {
-          c.persona = "P1 (Champions Recorrentes)";
-        } else if (alta_receita && !alta_frequencia) {
-          c.persona = "P2 (Grandes Projetos Capex)";
-        } else if (!alta_receita && alta_frequencia) {
-          c.persona = "P3 (Pequenos Recorrentes)";
-        } else {
-          c.persona = "P4 (Transacionais de Cauda)";
-        }
+        if (c.persona === "P1") c.persona = "P1 (Champions Recorrentes)";
+        else if (c.persona === "P2") c.persona = "P2 (Grandes Projetos Capex)";
+        else if (c.persona === "P3") c.persona = "P3 (Pequenos Recorrentes)";
+        else if (c.persona === "P4") c.persona = "P4 (Transacionais de Cauda)";
       });
       return ctx;
     }
@@ -616,46 +641,37 @@
       var c = resultado ? contexto() : { modelo: null, contas: [] };
       return fetch(url, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessao, pergunta: pergunta, modelo_llm: modeloLLM(),
-                               modelo: c.modelo, contas: c.contas, planos: planos() })
+        body: JSON.stringify({ sessionId: sessao, pergunta: pergunta, modelo_llm: modeloLLM(), modelo: c.modelo, contas: c.contas, planos: planos() })
       }).then(function (r) {
-        if (!r.ok) throw new Error("O n8n respondeu " + r.status + ". Confira se o workflow está ativo, se a URL é a de produção e se a credencial OpenRouter está escolhida nos três nós de modelo.");
+        if (!r.ok) throw new Error("O n8n respondeu " + r.status);
         return r.json();
       }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
 
     $("testar").addEventListener("click", function () {
-      var s = $("status-conexao");
-      s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
-      chamar("Responda apenas: conexão ok.").then(function () {
-        s.className = "status ok"; s.textContent = "Conexão ok"; trilha();
+      var s = $("status-conexao"); s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
+      chamar("Responda apenas: conexão ok.").then(function () { s.className = "status ok"; s.textContent = "Conexão ok"; trilha();
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
-      el.classList.remove("trabalhando", "pronto");
-      var rotulo = el.querySelector(".estado");
+      el.classList.remove("trabalhando", "pronto"); var rotulo = el.querySelector(".estado");
       if (estado === "trabalhando") { el.classList.add("trabalhando"); rotulo.innerHTML = 'trabalhando <span class="pontos"><span></span><span></span><span></span></span>'; }
       else if (estado === "pronto") { el.classList.add("pronto"); rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> concluído'; }
       else rotulo.textContent = "aguardando";
     }
 
     function animarEquipe() {
-      var i = 0;
-      AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
+      var i = 0; AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
       estadoAgente(AGENTES[0], "trabalhando");
-      var id = setInterval(function () {
-        if (i < AGENTES.length - 1) { estadoAgente(AGENTES[i], "pronto"); i++; estadoAgente(AGENTES[i], "trabalhando"); }
-      }, 5000);
+      var id = setInterval(function () { if (i < AGENTES.length - 1) { estadoAgente(AGENTES[i], "pronto"); i++; estadoAgente(AGENTES[i], "trabalhando"); } }, 5000);
       return function () { clearInterval(id); };
     }
 
     function bolha(classe, texto) {
-      var d = document.createElement("div");
-      d.className = "msg " + classe; d.textContent = texto;
-      $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight;
-      return d;
+      var d = document.createElement("div"); d.className = "msg " + classe; d.textContent = texto;
+      $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight; return d;
     }
 
     function aviso_chat(t) { bolha("aviso", t); }
@@ -663,9 +679,7 @@
     function digitar(el, texto) {
       var i = 0, passo = Math.max(2, Math.round(texto.length / 60));
       return new Promise(function (ok) {
-        (function vai() {
-          i = Math.min(texto.length, i + passo);
-          el.textContent = texto.slice(0, i);
+        (function vai() { i = Math.min(texto.length, i + passo); el.textContent = texto.slice(0, i);
           $("mensagens").scrollTop = $("mensagens").scrollHeight;
           if (i < texto.length) setTimeout(vai, 16); else ok();
         })();
@@ -676,8 +690,7 @@
       var m = text.match(/^\s*VEREDITO:\s*(aprovado|corrigido)[^\n]*\n*/i);
       if (m) {
         var corr = m[1].toLowerCase() === "corrigido";
-        var selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:14px">' +
-               (corr ? "edit_note" : "verified") + "</span>" + (corr ? "corrigido" : "aprovado") + "</span>";
+        var selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:14px">' + (corr ? "edit_note" : "verified") + "</span>" + (corr ? "corrigido" : "aprovado") + "</span>";
         return { selo: selo, text: text.slice(m[0].length) };
       }
       return { selo: "", text: text };
@@ -686,63 +699,36 @@
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
       var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
-      var d = document.createElement("div");
-      d.className = "msg agente-msg"; d.dataset.agente = chave;
-      var rawTexto = String(a.texto || "");
-      var res = messageSelo(rawTexto, d);
-      
-      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' + (icones[chave] || "smart_toy") + "</span>" +
-                    esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + res.selo + '</div><div class="corpo"></div>';
-      $("mensagens").appendChild(d);
-      return digitar(d.querySelector(".corpo"), res.text);
+      var d = document.createElement("div"); d.className = "msg agente-msg"; d.dataset.agente = chave;
+      var rawTexto = String(a.texto || ""); var res = messageSelo(rawTexto, d);
+      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' + (icones[chave] || "smart_toy") + "</span>" + esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + res.selo + '</div><div class="corpo"></div>';
+      $("mensagens").appendChild(d); return digitar(d.querySelector(".corpo"), res.text);
     }
 
     function perguntar(texto) {
-      texto = texto.trim();
-      if (!texto) return;
+      texto = texto.trim(); if (!texto) return;
       if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 antes de perguntar."); return; }
-      
-      bolha("eu", texto);
-      $("pergunta").value = "";
-      $("enviar").disabled = true;
-      
+      bolha("eu", texto); $("pergunta").value = ""; $("enviar").disabled = true;
       var parar = animarEquipe(), t0 = performance.now(), modelo = modeloLLM();
       
       chamar(texto).then(function (r) {
         parar();
         var agentes = r && r.agentes ? r.agentes : [{ nome: "Agente", papel: "", texto: (r && (r.resposta || r.output)) || JSON.stringify(r) }];
         var cadeia = Promise.resolve();
-        agentes.forEach(function (a) {
-          cadeia = cadeia.then(function () {
-            var chave = String(a.nome || "").toLowerCase();
-            var normalize = chave;
-            if (normalize === "guardião") normalize = "guardiao";
-            if (AGENTES.indexOf(normalize) >= 0) estadoAgente(normalize, "pronto");
-            return mensagemAgente(a);
-          });
-        });
-        return cadeia.then(function () {
-          AGENTES.forEach(function (ag) { estadoAgente(ag, "pronto"); });
+        agentes.forEach(function (a) { cadeia = cadeia.then(function () {
+            var chave = String(a.nome || "").toLowerCase(); var normalize = chave === "guardião" ? "guardiao" : chave;
+            if (AGENTES.indexOf(normalize) >= 0) estadoAgente(normalize, "pronto"); return mensagemAgente(a);
+        });});
+        return cadeia.then(function () { AGENTES.forEach(function (ag) { estadoAgente(ag, "pronto"); });
           bolha("rodape", "Equipe respondeu em " + Math.round((performance.now() - t0) / 1000) + " s, com " + (r.modelo || modelo) + ".");
         });
-      }).catch(function (e) {
-        parar();
-        AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
-        bolha("aviso", e.message);
-      }).then(function () {
-        $("enviar").disabled = false;
-        $("t4").classList.add("feito");
-      });
+      }).catch(function (e) { parar(); AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); }); bolha("aviso", e.message);
+      }).then(function () { $("enviar").disabled = false; $("t4").classList.add("feito"); });
     }
 
     $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
-    $("pergunta").addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); }
-    });
-
-    document.querySelectorAll("#sugestoes button").forEach(function (b) {
-      b.addEventListener("click", function () { perguntar(b.textContent); });
-    });
+    $("pergunta").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); } });
+    document.querySelectorAll("#sugestoes button").forEach(function (b) { b.addEventListener("click", function () { perguntar(b.textContent); }); });
 
     trilha();
   })();
