@@ -359,8 +359,21 @@
           var wb = csv ? XLSX.read(ev.target.result, { type: "string" })
                        : XLSX.read(new Uint8Array(ev.target.result), { type: "array", sheets: ["Dataset 1"], dense: true });
           var aba = wb.Sheets["Dataset 1"] || wb.Sheets[wb.SheetNames[0]];
+          
           linhas = XLSX.utils.sheet_to_json(aba, { defval: "", raw: true });
+          
+          // Tratamento para números seriais de data do Excel na base de 5 anos
+          linhas.forEach(function(l) {
+            if (typeof l.periodo === "number") {
+              var d = new Date(Math.round((l.periodo - 25569) * 86400 * 1000));
+              var yyyy = d.getUTCFullYear();
+              var mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+              l.periodo = yyyy + "-" + mm;
+            }
+          });
+
           var faltam = ["account_id", "periodo", "churn_label", "receita_usd", "qtd_pedidos"]
+
             .filter(function (c) { return !(linhas[0] && c in linhas[0]); });
           if (faltam.length) throw new Error("faltam as colunas " + faltam.join(", ") + ". Use a aba Dataset 1 da base do case.");
           $("nome-arquivo").className = "status ok";
