@@ -54,7 +54,6 @@
     .status.ok { color: var(--seg-secundaria); font-weight: 600; }
     .status.erro { color: var(--seg-destaque); font-weight: 600; }
     .material-symbols-outlined { font-size: 20px; }
-
     /* 01: planilha */
     .soltar { border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer; background: var(--seg-superficie); transition: border-color .2s, background .2s; }
     .soltar:hover, .soltar.ativo { border-color: var(--seg-secundaria); background: var(--seg-base); }
@@ -88,17 +87,15 @@
     tbody tr:hover td { background: var(--seg-superficie); }
     tr.perdida td:first-child { border-left: 4px solid var(--seg-destaque); }
     .legenda { font-size: 12px; margin: 6px 0 0; }
-
     /* 02: planos */
     .abas { display: flex; border-bottom: 2px solid var(--seg-primaria); margin-top: 6px; }
     .abas button { background: var(--seg-base); color: var(--seg-primaria); padding: 8px 16px; }
     .abas button[aria-selected=true] { background: var(--seg-primaria); color: var(--inteli-branco); }
     .aba { display: none; padding-top: 10px; }
     .aba.ativa { display: block; }
-
     /* 04: a equipe */
     .chat { display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 680px; position: sticky; top: 16px; }
-    .equipe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .equipe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
     @media (max-width: 560px) { .equipe { grid-template-columns: 1fr; } }
     .agente { border: 1px solid var(--seg-borda); padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; position: relative; overflow: hidden; transition: border-color .3s; }
     .avatar { grid-row: span 3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -127,7 +124,7 @@
     .msg.agente-msg[data-agente=vera] { border-left-color: var(--seg-secundaria); }
     .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base);
       border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
-    .msg.agente-msg[data-agente=guardiao], .msg.agente-msg[data-agente=guardião] { border-left-color: var(--inteli-coral); }
+    .msg.agente-msg[data-agente=gilberto] { border-left-color: var(--inteli-coral); }
     .msg .quem { display: flex; gap: 6px; align-items: center; font-weight: 700; font-size: 13px; margin-bottom: 4px; white-space: normal; }
     .msg .quem small { font-weight: 500; }
     .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto;
@@ -140,7 +137,6 @@
     .enviar { display: flex; gap: 8px; }
     .enviar textarea { min-height: 52px; height: 52px; }
     footer { text-align: center; font-size: 13px; padding: 0 16px 32px; }
-
     @keyframes girar { to { transform: rotate(360deg); } }
     @keyframes pulso { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
     @keyframes varrer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
@@ -162,7 +158,6 @@
       <li id="t4"><span class="n">4</span>Conversa com a equipe</li>
     </ol></nav>
   </header>
-
   <main>
     <div class="coluna">
       <section class="bloco" id="bloco-planilha">
@@ -217,7 +212,6 @@
           <p class="legenda">Clique numa conta para perguntar à equipe sobre ela. Barra vermelha à esquerda: conta marcada como perdida no case.</p>
         </div>
       </section>
-
       <section class="bloco" id="bloco-planos">
         <h2><span class="num">02</span>Planos de ação e Personas (Fixos)</h2>
         <p class="ajuda">A Vera, estrategista da equipe, analisará as contas baseada nos SLAs por persona e nos planos abaixo.</p>
@@ -257,7 +251,6 @@
         </div>
         <div class="linha"><span class="status">Estes planos são fixos e enviados automaticamente à equipe de agentes.</span></div>
       </section>
-
       <section class="bloco" id="bloco-conexao">
         <h2><span class="num">03</span>Conexão com a equipe no n8n</h2>
         <p class="ajuda">Baixe o workflow, importe no n8n, escolha a sua credencial OpenRouter nos três nós de modelo, troque <code>NOME_DO_GRUPO</code> no caminho do Webhook e ative. Cole aqui a URL de produção.</p>
@@ -270,21 +263,24 @@
         </div>
       </section>
     </div>
-
     <div class="coluna">
       <section class="bloco chat">
         <h2><span class="num">04</span>Conversa com a equipe de agentes</h2>
-        <p class="ajuda">Cada pergunta passa por três agentes, em sequência, no n8n. Cada um usa o modelo de linguagem escolhido abaixo.</p>
+        <p class="ajuda">Cada pergunta passa por quatro agentes, em sequência, no n8n. Cada um usa o modelo de linguagem escolhido abaixo.</p>
+        
+        <!-- INÍCIO DA ATUALIZAÇÃO DOS AGENTES -->
         <div class="equipe" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
           <div class="agente" data-agente="atlas"><div class="avatar"><span class="material-symbols-outlined">query_stats</span></div>
             <span class="nome">Atlas</span><span class="papel">Analista da fila</span><span class="estado">aguardando</span></div>
           <div class="agente" data-agente="vera"><div class="avatar"><span class="material-symbols-outlined">flag</span></div>
             <span class="nome">Vera</span><span class="papel">Estrategista</span><span class="estado">aguardando</span></div>
+          <div class="agente" data-agente="gilberto"><div class="avatar" style="background: var(--inteli-coral);"><span class="material-symbols-outlined">campaign</span></div>
+            <span class="nome">Gilberto</span><span class="papel">Especialista Mkt</span><span class="estado">aguardando</span></div>
           <div class="agente" data-agente="ciro"><div class="avatar"><span class="material-symbols-outlined">fact_check</span></div>
             <span class="nome">Ciro</span><span class="papel">Revisor</span><span class="estado">aguardando</span></div>
-          <div class="agente" data-agente="guardiao"><div class="avatar" style="background: var(--inteli-coral);"><span class="material-symbols-outlined">security</span></div>
-            <span class="nome">Guardião</span><span class="papel">Segurança</span><span class="estado">aguardando</span></div>
         </div>
+        <!-- FIM DA ATUALIZAÇÃO -->
+
         <div class="modelo-linha">
           <div>
             <label for="modelo-llm">Modelo de linguagem, via OpenRouter</label>
@@ -317,22 +313,17 @@
     </div>
   </main>
   <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia &middot; Deivison Raijan, Fábio Pimentel, Fábio Pirotta, Felipe Santos, Marcos Moura, Rafael Moritz</footer>
-
   <script src="modelo.js"></script>
   <script>
   (function () {
     "use strict";
-
     // ========================================================================
     // 1. MOTOR DE INFERÊNCIA ESTÁTICO (SEU MODELO TREINADO - V2.0.0)
     // ========================================================================
     class KovanChurnPredictor {
         constructor() {
-            // Parâmetros de padronização (Treino de Fev/2024)
             this.means = { recencia_meses: 10.970878171120038, freq_dias: 9.87350315697801, receita_anualizada: 211026.06822818983 };
             this.scales = { recencia_meses: 9.86311651877963, freq_dias: 27.2410313467645, receita_anualizada: 2097746.4259850616 };
-            
-            // Pesos (coeficientes) aprendidos com corte de Fev/2024
             this.intercept = -0.4285817296068229;
             this.coef = { 
                 recencia_meses: 0.7252251323389551, 
@@ -373,9 +364,7 @@
             }
         }
     }
-
     var preditorEstatico = new KovanChurnPredictor();
-
     // ========================================================================
     // 2. CONFIGURAÇÕES E PLANOS
     // ========================================================================
@@ -386,9 +375,9 @@
       personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US$ 52.827\",\"290 dias\""
     };
 
-    var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
+    // 🔥 ATUALIZAÇÃO DA ORDEM DOS AGENTES AQUI 🔥
+    var AGENTES = ["atlas", "vera", "gilberto", "ciro"];
     function planos() { return { comercial: PLANOS_FIXOS.comercial, atendimento: PLANOS_FIXOS.atendimento, "pós-vendas": PLANOS_FIXOS.posvendas, personas: PLANOS_FIXOS.personas }; }
-
     var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
     var resultado = null;
@@ -404,19 +393,16 @@
       if (Math.abs(v) >= 1e3) return dec(v / 1e3, 1) + " mil";
       return fmt.format(v);
     }
-
     function trilha() {
       $("t1").classList.toggle("feito", !!resultado);
       $("t2").classList.toggle("feito", true);
       $("t3").classList.toggle("feito", $("status-conexao").classList.contains("ok"));
     }
-
     function etapa(nome, estado) {
       var li = document.querySelector('#etapas li[data-e="' + nome + '"]');
       li.className = estado;
       li.querySelector(".material-symbols-outlined").textContent = estado === "feita" ? "check_circle" : "progress_activity";
     }
-
     function carregar(arquivo) {
       $("nome-arquivo").className = "status"; $("nome-arquivo").textContent = arquivo.name;
       $("etapas").classList.add("visivel");
@@ -430,14 +416,12 @@
           var wb = csv ? XLSX.read(ev.target.result, { type: "string" }) : XLSX.read(new Uint8Array(ev.target.result), { type: "array", sheets: ["Dataset 1"], dense: true });
           var aba = wb.Sheets["Dataset 1"] || wb.Sheets[wb.SheetNames[0]];
           linhas = XLSX.utils.sheet_to_json(aba, { defval: "", raw: true });
-
           linhas.forEach(function(l) {
             if (typeof l.periodo === "number") {
               var d = new Date(Math.round((l.periodo - 25569) * 86400 * 1000));
               l.periodo = d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0");
             }
           });
-
           $("nome-arquivo").className = "status ok"; $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
           var sel = $("filtro-segmento");
           if (sel) { sel.innerHTML = '<option value="Todos">Todos</option>'; }
@@ -456,7 +440,6 @@
       };
       if (arquivo.name.toLowerCase().endsWith(".csv")) leitor.readAsText(arquivo, "utf-8"); else leitor.readAsArrayBuffer(arquivo);
     }
-
     // ========================================================================
     // 3. CALCULO E INFERÊNCIA DO MODELO CUSTOMIZADO
     // ========================================================================
@@ -507,7 +490,6 @@
       };
       KovanModelo.COLUNAS = Object.keys(rCompleto.pesos);
       rCompleto.auc = 0.804; // AUC extraído da sua validação
-
       var sel = $("filtro-segmento");
       if (sel && sel.options.length === 1) {
         ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"].forEach(function(s) {
@@ -635,14 +617,12 @@
       return ctx;
     }
     window.KovanContexto = function () { return resultado ? contexto() : null; };
-
     document.querySelectorAll(".abas button").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
         document.querySelectorAll(".aba").forEach(function (x) { x.classList.toggle("ativa", x.dataset.aba === b.dataset.aba); });
       });
     });
-
     var sel = $("modelo-llm");
     var salvo = ler("kovan-modelo-llm");
     if (salvo && sel.querySelector('option[value="' + salvo + '"]')) sel.value = salvo;
@@ -652,10 +632,8 @@
     sel.addEventListener("change", function () { gravar("kovan-modelo-llm", sel.value); mostrarOutro(); });
     $("modelo-outro").addEventListener("change", function () { gravar("kovan-modelo-outro", this.value.trim()); });
     function modeloLLM() { return sel.value === "outro" ? $("modelo-outro").value.trim() : sel.value; }
-
     $("endpoint").value = ler("kovan-endpoint") || "";
     $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
-
     function chamar(pergunta) {
       var url = $("endpoint").value.trim();
       if (!url) return Promise.reject(new Error("Configure o endpoint do n8n no bloco 03."));
@@ -668,13 +646,11 @@
         return r.json();
       }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
-
     $("testar").addEventListener("click", function () {
       var s = $("status-conexao"); s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
       chamar("Responda apenas: conexão ok.").then(function () { s.className = "status ok"; s.textContent = "Conexão ok"; trilha();
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
-
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
       el.classList.remove("trabalhando", "pronto"); var rotulo = el.querySelector(".estado");
@@ -682,21 +658,17 @@
       else if (estado === "pronto") { el.classList.add("pronto"); rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> concluído'; }
       else rotulo.textContent = "aguardando";
     }
-
     function animarEquipe() {
       var i = 0; AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
       estadoAgente(AGENTES[0], "trabalhando");
       var id = setInterval(function () { if (i < AGENTES.length - 1) { estadoAgente(AGENTES[i], "pronto"); i++; estadoAgente(AGENTES[i], "trabalhando"); } }, 5000);
       return function () { clearInterval(id); };
     }
-
     function bolha(classe, texto) {
       var d = document.createElement("div"); d.className = "msg " + classe; d.textContent = texto;
       $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight; return d;
     }
-
     function aviso_chat(t) { bolha("aviso", t); }
-
     function digitar(el, texto) {
       var i = 0, passo = Math.max(2, Math.round(texto.length / 60));
       return new Promise(function (ok) {
@@ -706,7 +678,6 @@
         })();
       });
     }
-
     function messageSelo(text, d) {
       var m = text.match(/^\s*VEREDITO:\s*(aprovado|corrigido)[^\n]*\n*/i);
       if (m) {
@@ -716,20 +687,31 @@
       }
       return { selo: "", text: text };
     }
-
+    
+    // 🔥 LÓGICA ATUALIZADA PARA LER O HTML DO GILBERTO 🔥
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
-      var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
+      var icones = { atlas: "query_stats", vera: "flag", gilberto: "campaign", ciro: "fact_check" };
       var d = document.createElement("div"); d.className = "msg agente-msg"; d.dataset.agente = chave;
       var rawTexto = String(a.texto || ""); var res = messageSelo(rawTexto, d);
       d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' + (icones[chave] || "smart_toy") + "</span>" + esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + res.selo + '</div><div class="corpo"></div>';
-      $("mensagens").appendChild(d); return digitar(d.querySelector(".corpo"), res.text);
+      $("mensagens").appendChild(d); 
+      
+      // O Gilberto retorna HTML estruturado para as campanhas. Renderizamos sem 'digitar' p/ não quebrar as tags.
+      if (chave === "gilberto") {
+         var htmlSeguro = res.text.replace(/```html/gi, "").replace(/```/g, "").trim();
+         d.querySelector(".corpo").innerHTML = htmlSeguro;
+         \$("mensagens").scrollTop = \$("mensagens").scrollHeight;
+         return Promise.resolve();
+      }
+      
+      return digitar(d.querySelector(".corpo"), res.text);
     }
-
+    
     function perguntar(texto) {
       texto = texto.trim(); if (!texto) return;
       if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 antes de perguntar."); return; }
-      bolha("eu", texto); $("pergunta").value = ""; $("enviar").disabled = true;
+      bolha("eu", texto); \$("pergunta").value = ""; \$("enviar").disabled = true;
       var parar = animarEquipe(), t0 = performance.now(), modelo = modeloLLM();
       
       chamar(texto).then(function (r) {
@@ -737,20 +719,18 @@
         var agentes = r && r.agentes ? r.agentes : [{ nome: "Agente", papel: "", texto: (r && (r.resposta || r.output)) || JSON.stringify(r) }];
         var cadeia = Promise.resolve();
         agentes.forEach(function (a) { cadeia = cadeia.then(function () {
-            var chave = String(a.nome || "").toLowerCase(); var normalize = chave === "guardião" ? "guardiao" : chave;
+            var chave = String(a.nome || "").toLowerCase(); var normalize = chave;
             if (AGENTES.indexOf(normalize) >= 0) estadoAgente(normalize, "pronto"); return mensagemAgente(a);
         });});
         return cadeia.then(function () { AGENTES.forEach(function (ag) { estadoAgente(ag, "pronto"); });
           bolha("rodape", "Equipe respondeu em " + Math.round((performance.now() - t0) / 1000) + " s, com " + (r.modelo || modelo) + ".");
         });
       }).catch(function (e) { parar(); AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); }); bolha("aviso", e.message);
-      }).then(function () { $("enviar").disabled = false; $("t4").classList.add("feito"); });
+      }).then(function () { \$("enviar").disabled = false; \$("t4").classList.add("feito"); });
     }
-
-    $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
+    \$("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar(\$("pergunta").value); });
     $("pergunta").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); } });
     document.querySelectorAll("#sugestoes button").forEach(function (b) { b.addEventListener("click", function () { perguntar(b.textContent); }); });
-
     trilha();
   })();
   </script>
