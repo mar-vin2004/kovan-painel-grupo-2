@@ -428,7 +428,9 @@
 
     function calcular() {
       if (!linhas.length) return;
-      var rCompleto = KovanModelo.rodar(linhas, lines => lines.length);
+      // ✅ Como deve ficar:
+      var rCompleto = KovanModelo.rodar(linhas, linhas.length);
+
       var sel = $("filtro-segmento");
       if (sel && sel.options.length === 1) {
         var segmentosPossiveis = ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"];
