@@ -324,16 +324,27 @@
     "use strict";
 
     // ========================================================================
-    // 1. MOTOR DE INFERÊNCIA ESTÁTICO (SEU MODELO TREINADO)
+    // 1. MOTOR DE INFERÊNCIA ESTÁTICO (SEU MODELO TREINADO - V2.0.0)
     // ========================================================================
     class KovanChurnPredictor {
         constructor() {
-            this.means = { recencia_meses: 11.349827285343144, freq_dias: 10.124044180118947, receita_anualizada: 215475.0164111122 };
-            this.scales = { recencia_meses: 10.156088159448846, freq_dias: 28.04602949118909, receita_anualizada: 2149809.4266955303 };
-            this.intercept = -0.5237323806152685;
-            this.coef = { recencia_meses: 0.928336560276413, freq_dias: -2.249459333326394, receita_anualizada: -0.40864330054487336, P2: -0.1333812165971886, P3: 0.24775806081567536, P4: 0.4616313492113473 };
+            // Parâmetros de padronização (Treino de Fev/2024)
+            this.means = { recencia_meses: 10.970878171120038, freq_dias: 9.87350315697801, receita_anualizada: 211026.06822818983 };
+            this.scales = { recencia_meses: 9.86311651877963, freq_dias: 27.2410313467645, receita_anualizada: 2097746.4259850616 };
+            
+            // Pesos (coeficientes) aprendidos com corte de Fev/2024
+            this.intercept = -0.4285817296068229;
+            this.coef = { 
+                recencia_meses: 0.7252251323389551, 
+                freq_dias: -2.854279586146059, 
+                receita_anualizada: -0.07466810214349137, 
+                P2: -0.09015949503463996, 
+                P3: 0.21715423851522067, 
+                P4: 0.40590472494953934 
+            };
             this.validPersonas = new Set(['P1', 'P2', 'P3', 'P4']);
         }
+        
         _validateInputs(recencia, freq, receita, persona) {
             const cleanRecencia = (recencia !== undefined && recencia !== null) ? Number(recencia) : this.means.recencia_meses;
             const cleanFreq = (freq !== undefined && freq !== null) ? Number(freq) : this.means.freq_dias;
@@ -341,16 +352,20 @@
             const cleanPersona = this.validPersonas.has(persona) ? persona : 'P4';
             return { cleanRecencia, cleanFreq, cleanReceita, cleanPersona };
         }
+        
         predict(recenciaMeses, freqDias, receitaAnualizada, persona) {
             try {
                 const { cleanRecencia, cleanFreq, cleanReceita, cleanPersona } = this._validateInputs(recenciaMeses, freqDias, receitaAnualizada, persona);
                 const recenciaScaled = (cleanRecencia - this.means.recencia_meses) / this.scales.recencia_meses;
                 const freqDiasScaled = (cleanFreq - this.means.freq_dias) / this.scales.freq_dias;
                 const receitaScaled = (cleanReceita - this.means.receita_anualizada) / this.scales.receita_anualizada;
+                
                 const isP2 = cleanPersona === 'P2' ? 1 : 0;
                 const isP3 = cleanPersona === 'P3' ? 1 : 0;
                 const isP4 = cleanPersona === 'P4' ? 1 : 0;
+                
                 const logOdds = this.intercept + (recenciaScaled * this.coef.recencia_meses) + (freqDiasScaled * this.coef.freq_dias) + (receitaScaled * this.coef.receita_anualizada) + (isP2 * this.coef.P2) + (isP3 * this.coef.P3) + (isP4 * this.coef.P4);
+                
                 const probability = 1 / (1 + Math.exp(-logOdds));
                 return { success: true, probability: probability };
             } catch (error) {
@@ -358,6 +373,7 @@
             }
         }
     }
+
     var preditorEstatico = new KovanChurnPredictor();
 
     // ========================================================================
@@ -485,7 +501,7 @@
           "Persona P2": preditorEstatico.coef.P2
       };
       KovanModelo.COLUNAS = Object.keys(rCompleto.pesos);
-      rCompleto.auc = 0.814; // AUC extraído da sua validação
+      rCompleto.auc = 0.804; // AUC extraído da sua validação
 
       var sel = $("filtro-segmento");
       if (sel && sel.options.length === 1) {
