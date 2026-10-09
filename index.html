@@ -231,18 +231,43 @@
       </section>
 
       <section class="bloco" id="bloco-planos">
-        <h2><span class="num">02</span>Planos de ação por área</h2>
-        <p class="ajuda">A Vera, estrategista da equipe, só recomenda o que estiver escrito aqui. Os textos são exemplos: substitua pelo plano do grupo, com o limiar numérico de cada item.</p>
+        <h2><span class="num">02</span>Planos de ação e Personas (Fixos)</h2>
+        <p class="ajuda">A Vera, estrategista da equipe, analisará as contas baseada nos SLAs por persona e nos planos abaixo.</p>
         <div class="abas" role="tablist">
           <button type="button" role="tab" aria-selected="true" data-aba="comercial">Comercial</button>
           <button type="button" role="tab" aria-selected="false" data-aba="atendimento">Atendimento</button>
           <button type="button" role="tab" aria-selected="false" data-aba="posvendas">Pós-vendas</button>
+          <button type="button" role="tab" aria-selected="false" data-aba="personas">Personas e SLAs</button>
         </div>
-        <div class="aba ativa" data-aba="comercial"><textarea id="plano-comercial" aria-label="Plano da área comercial"></textarea></div>
-        <div class="aba" data-aba="atendimento"><textarea id="plano-atendimento" aria-label="Plano da área de atendimento"></textarea></div>
-        <div class="aba" data-aba="posvendas"><textarea id="plano-posvendas" aria-label="Plano da área de pós-vendas"></textarea></div>
-        <div class="linha"><button id="restaurar" class="secundario" type="button">Restaurar exemplos</button>
-          <span class="status">Os planos ficam salvos neste navegador.</span></div>
+        <div class="aba ativa" data-aba="comercial">
+          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
+            <strong>1. Contas P1 (Champions Recorrentes):</strong> Ao atingir o Dia 30 sem nova compra, acionar o KAM para atendimento dedicado e agendamento da QBR.<br>
+            <strong>2. Contas P2 (Grandes Projetos Capex):</strong> Ao atingir o Dia 150 desde o último grande projeto, iniciar o mapeamento do próximo ciclo orçamentário.<br>
+            <strong>3. Contas P4:</strong> Nenhuma condição comercial ou tempo de vendedor deve ser alocado (apenas modelo self-service).
+          </div>
+        </div>
+        <div class="aba" data-aba="atendimento">
+          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
+            <strong>1. Contas P3 (Pequenos Recorrentes):</strong> Ao atingir o Dia 90 sem compra, acionar automação via CRM para ofertas casadas (cross-sell).<br>
+            <strong>2. Contas P4 (Transacionais de Cauda):</strong> Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar ao e-commerce.<br>
+            <strong>3. CRM:</strong> Registrar todo o resultado das automações P3 e interações no portal digital P4.
+          </div>
+        </div>
+        <div class="aba" data-aba="posvendas">
+          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
+            <strong>1. Contas P2:</strong> Oferecer suporte técnico avançado (Premier Support) durante a janela de inatividade (9 a 10 meses).<br>
+            <strong>2. Contas P1:</strong> Acompanhar satisfação de uso do ecossistema multicesta nas QBRs para garantir qualidade de suporte.
+          </div>
+        </div>
+        <div class="aba" data-aba="personas">
+          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
+            <strong>P1 (Champions):</strong> Receita ≥ US$ 52.827 | P85 SLA: 20 dias<br>
+            <strong>P2 (Grandes Projetos):</strong> Receita ≥ US$ 52.827 | P85 SLA: 120 dias<br>
+            <strong>P3 (Pequ. Recorrentes):</strong> Receita &lt; US$ 52.827 | P85 SLA: 40 dias<br>
+            <strong>P4 (Cauda):</strong> Receita &lt; US$ 52.827 | P85 SLA: 290 dias
+          </div>
+        </div>
+        <div class="linha"><span class="status">Estes planos são fixos e enviados automaticamente à equipe de agentes.</span></div>
       </section>
 
       <section class="bloco" id="bloco-conexao">
@@ -309,13 +334,24 @@
   <script>
   (function () {
     "use strict";
-    var PLANOS_EXEMPLO = {
-      comercial: "Exemplo, substitua pelo plano do grupo.\n1. Conta com valor esperado acima de USD 500 mil: ligação do Account Manager em até 5 dias úteis, com revisão do mix comprado nos últimos 12 meses.\n2. Conta com receita dos 12 meses abaixo de metade do pico anual: proposta de renovação do parque instalado, sem desconto fora da tabela vigente.\n3. Nenhuma condição comercial é oferecida sem aprovação do gerente regional.",
-      atendimento: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 4 meses ou mais desde a última compra: contato do time de atendimento para verificar chamados abertos e satisfação.\n2. Registrar no CRM o motivo informado pelo cliente.\n3. Escalar ao Comercial quando o cliente citar concorrente.",
-      posvendas: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 3 meses ou menos de compra nos últimos 12: revisão técnica do parque e da garantia.\n2. Conta com contrato de serviço a vencer em 90 dias: oferta de extensão de garantia pela tabela vigente.\n3. Registrar no CRM toda visita técnica feita a conta da fila."
+    var PLANOS_FIXOS = {
+      comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
+      atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
+      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proativamente o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
+      personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US$ 52.827\",\"290 dias\""
     };
     var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
-    var AREAS = ["comercial", "atendimento", "posvendas"];
+    var AREAS = ["comercial", "atendimento", "posvendas", "personas"];
+
+    function planos() {
+      return { 
+        comercial: PLANOS_FIXOS.comercial, 
+        atendimento: PLANOS_FIXOS.atendimento,
+        "pós-vendas": PLANOS_FIXOS.posvendas, 
+        personas: PLANOS_FIXOS.personas 
+      };
+    }
+
 
     var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
@@ -335,7 +371,7 @@
     }
     function trilha() {
       $("t1").classList.toggle("feito", !!resultado);
-      $("t2").classList.toggle("feito", AREAS.every(function (a) { return $("plano-" + a).value.trim(); }));
+      $("t2").classList.toggle("feito", true);
       $("t3").classList.toggle("feito", $("status-conexao").classList.contains("ok"));
     }
 
@@ -537,19 +573,10 @@
     window.KovanContexto = function () { return resultado ? contexto() : null; };
 
     // ---- 02 planos
-    AREAS.forEach(function (a) {
-      var t = $("plano-" + a);
-      t.value = ler("kovan-plano-" + a) || PLANOS_EXEMPLO[a];
-      t.addEventListener("input", function () { gravar("kovan-plano-" + a, t.value); trilha(); });
-    });
     function planos() {
       return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value,
                "pós-vendas": $("plano-posvendas").value };
     }
-    $("restaurar").addEventListener("click", function () {
-      AREAS.forEach(function (a) { $("plano-" + a).value = PLANOS_EXEMPLO[a]; gravar("kovan-plano-" + a, PLANOS_EXEMPLO[a]); });
-      trilha();
-    });
     document.querySelectorAll(".abas button").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
