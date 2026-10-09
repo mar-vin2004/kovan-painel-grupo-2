@@ -4,17 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel de retenção Kovan &middot; MBA Inteli x Lenovo</title>
-  <!--
-    Painel da Aula 08. Uma página, sem build: lê a planilha original do case,
-    treina o modelo no navegador (modelo.js), guarda os planos de ação de cada
-    área e conversa com uma equipe de três agentes no n8n.
-
-    Para criar a versão do grupo: a pasta frontend/ do repositório de prática
-    tem a mesma página pronta para abrir no Antigravity e modificar.
-
-    A planilha fica no navegador. Ao endpoint configurado vão só a fila do
-    ciclo, o resumo do modelo, os planos e o nome do modelo de linguagem.
-  -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Platypi:wght@500;600&family=Space+Mono&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
   <link rel="stylesheet" href="inteli-brand.css">
@@ -30,7 +19,6 @@
     .topo-linha { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; max-width: 1320px; margin: 0 auto; }
     header.topo h1 { margin: 0; font-size: 28px; color: var(--inteli-branco); }
     header.topo p { margin: 0; font-size: 14px; }
-    /* Trilha dos quatro passos: cada um acende quando fica pronto. */
     .trilha { max-width: 1320px; margin: 16px auto 0; overflow-x: auto; }
     .trilha ol { display: flex; margin: 0; padding: 0; }
     .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px;
@@ -338,7 +326,7 @@
     var PLANOS_FIXOS = {
       comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
       atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
-      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proativamente o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
+      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proactively o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
       personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US$ 52.827\",\"290 dias\""
     };
 
@@ -440,7 +428,7 @@
 
     function calcular() {
       if (!linhas.length) return;
-      var rCompleto = KovanModelo.rodar(linhas, linhas.length);
+      var rCompleto = KovanModelo.rodar(linhas, lines => lines.length);
       var sel = $("filtro-segmento");
       if (sel && sel.options.length === 1) {
         var segmentosPossiveis = ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"];
@@ -457,6 +445,16 @@
       }
       var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
       var fila = filaFiltrada.slice(0, cap);
+      
+      fila.forEach(function(c) {
+        var alta_receita = c.valor_em_risco >= 52827;
+        var alta_frequencia = c.meses_com_compra_12m >= 4;
+        if (alta_receita && alta_frequencia) c.persona = "P1";
+        else if (alta_receita && !alta_frequencia) c.persona = "P2";
+        else if (!alta_receita && alta_frequencia) c.persona = "P3";
+        else c.persona = "P4";
+      });
+      
       resultado = {
         contas: rCompleto.contas,
         perdidas: rCompleto.perdidas,
@@ -510,7 +508,7 @@
       setTimeout(function () {
         document.querySelectorAll("#pesos .barra span").forEach(function (s) { s.style.width = s.dataset.l; });
       }, 50);
-      var cols = [["posicao", "Pos."], ["account_id", "Conta"], ["segment", "Segmento"], ["escore", "Escore"],
+      var cols = [["posicao", "Pos."], ["account_id", "Conta"], ["segment", "Segmento"], ["persona", "Persona"], ["escore", "Escore"],
                   ["valor_em_risco", "Receita 12m"], ["valor_esperado", "Valor esperado"],
                   ["meses_desde_ultima_compra", "Meses sem compra"], ["meses_com_compra_12m", "Meses com compra"]];
       var html = "<thead><tr>" + cols.map(function (c) { return "<th>" + c[1] + "</th>"; }).join("") + "</tr></thead><tbody>";
@@ -570,7 +568,24 @@
     ["dragleave", "drop"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove("ativo"); }); });
     zona.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) carregar(e.dataTransfer.files[0]); });
     
-    function contexto() { return KovanModelo.contexto(resultado); }
+    function contexto() { 
+      var ctx = KovanModelo.contexto(resultado); 
+      ctx.contas.forEach(function(c) {
+        var alta_receita = c.receita_12m_usd >= 52827;
+        var alta_frequencia = c.meses_com_compra_nos_ultimos_12 >= 4;
+        
+        if (alta_receita && alta_frequencia) {
+          c.persona = "P1 (Champions Recorrentes)";
+        } else if (alta_receita && !alta_frequencia) {
+          c.persona = "P2 (Grandes Projetos Capex)";
+        } else if (!alta_receita && alta_frequencia) {
+          c.persona = "P3 (Pequenos Recorrentes)";
+        } else {
+          c.persona = "P4 (Transacionais de Cauda)";
+        }
+      });
+      return ctx;
+    }
     window.KovanContexto = function () { return resultado ? contexto() : null; };
 
     document.querySelectorAll(".abas button").forEach(function (b) {
@@ -655,24 +670,29 @@
       });
     }
 
+    function messageSelo(text, d) {
+      var m = text.match(/^\s*VEREDITO:\s*(aprovado|corrigido)[^\n]*\n*/i);
+      if (m) {
+        var corr = m[1].toLowerCase() === "corrigido";
+        var selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:14px">' +
+               (corr ? "edit_note" : "verified") + "</span>" + (corr ? "corrigido" : "aprovado") + "</span>";
+        return { selo: selo, text: text.slice(m[0].length) };
+      }
+      return { selo: "", text: text };
+    }
+
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
       var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
       var d = document.createElement("div");
       d.className = "msg agente-msg"; d.dataset.agente = chave;
-      var texto = String(a.texto || "");
-      var selo = "";
-      var m = texto.match(/^\s*VEREDITO:\s*(aprovado|corrigido)[^\n]*\n*/i);
-      if (m) {
-        var corr = m[1].toLowerCase() === "corrigido";
-        selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:14px">' +
-               (corr ? "edit_note" : "verified") + "</span>" + (corr ? "corrigido" : "aprovado") + "</span>";
-        texto = texto.slice(m[0].length);
-      }
+      var rawTexto = String(a.texto || "");
+      var res = messageSelo(rawTexto, d);
+      
       d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' + (icones[chave] || "smart_toy") + "</span>" +
-                    esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + selo + '</div><div class="corpo"></div>';
+                    esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + res.selo + '</div><div class="corpo"></div>';
       $("mensagens").appendChild(d);
-      return digitar(d.querySelector(".corpo"), texto);
+      return digitar(d.querySelector(".corpo"), res.text);
     }
 
     function perguntar(texto) {
