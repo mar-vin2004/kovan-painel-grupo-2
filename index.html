@@ -8,6 +8,12 @@
     Painel da Aula 08. Uma página, sem build: lê a planilha original do case,
     treina o modelo no navegador (modelo.js), guarda os planos de ação de cada
     área e conversa com uma equipe de três agentes no n8n.
+
+    Para criar a versão do grupo: a pasta frontend/ do repositório de prática
+    tem a mesma página pronta para abrir no Antigravity e modificar.
+
+    A planilha fica no navegador. Ao endpoint configurado vão só a fila do
+    ciclo, o resumo do modelo, os planos e o nome do modelo de linguagem.
   -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Platypi:wght@500;600&family=Space+Mono&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
@@ -17,17 +23,24 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--seg-superficie); color: var(--seg-texto); font-size: 16px; }
     a { color: var(--seg-secundaria); }
-    header.topo { background: var(--seg-primaria); color: var(--inteli-branco); padding: 18px 32px 0; border-bottom: 4px solid var(--seg-destaque); }
+    header.topo {
+      background: var(--seg-primaria); color: var(--inteli-branco);
+      padding: 18px 32px 0; border-bottom: 4px solid var(--seg-destaque);
+    }
     .topo-linha { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; max-width: 1320px; margin: 0 auto; }
     header.topo h1 { margin: 0; font-size: 28px; color: var(--inteli-branco); }
     header.topo p { margin: 0; font-size: 14px; }
+    /* Trilha dos quatro passos: cada um acende quando fica pronto. */
     .trilha { max-width: 1320px; margin: 16px auto 0; overflow-x: auto; }
     .trilha ol { display: flex; margin: 0; padding: 0; }
-    .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px; border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; }
-    .trilha .n { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--inteli-branco); font-weight: 700; font-size: 13px; flex: none; transition: background .4s; }
+    .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px;
+                 border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; }
+    .trilha .n { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+                 border: 2px solid var(--inteli-branco); font-weight: 700; font-size: 13px; flex: none; transition: background .4s; }
     .trilha li.feito { border-top-color: var(--seg-secundaria); }
     .trilha li.feito .n { background: var(--seg-secundaria); border-color: var(--seg-secundaria); }
-    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
+    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
+           display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
     @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
     .coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
     section.bloco { background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 20px 22px; }
@@ -35,10 +48,17 @@
     .bloco h2 .num { color: var(--seg-destaque); font-size: 15px; }
     .bloco .ajuda { margin: 0 0 14px; font-size: 14px; line-height: 1.5; }
     label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
-    input[type=url], input[type=text], textarea, select { width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 10px 12px; }
+    input[type=url], input[type=text], textarea, select {
+      width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base);
+      border: 1px solid var(--seg-borda); padding: 10px 12px;
+    }
     textarea { min-height: 110px; resize: vertical; font-size: 14px; line-height: 1.45; }
     input:focus, textarea:focus, select:focus { outline: 2px solid var(--seg-secundaria); outline-offset: -1px; }
-    button, a.botao { font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px; background: var(--seg-primaria); color: var(--inteli-branco); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+    button, a.botao {
+      font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px;
+      background: var(--seg-primaria); color: var(--inteli-branco); text-decoration: none;
+      display: inline-flex; gap: 8px; align-items: center;
+    }
     button.secundario, a.botao { background: var(--seg-base); color: var(--seg-primaria); border: 1px solid var(--seg-primaria); }
     button:disabled { cursor: not-allowed; background: var(--seg-borda); color: var(--seg-texto); }
     .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
@@ -46,6 +66,8 @@
     .status.ok { color: var(--seg-secundaria); font-weight: 600; }
     .status.erro { color: var(--seg-destaque); font-weight: 600; }
     .material-symbols-outlined { font-size: 20px; }
+
+    /* 01: planilha */
     .soltar { border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer; background: var(--seg-superficie); transition: border-color .2s, background .2s; }
     .soltar:hover, .soltar.ativo { border-color: var(--seg-secundaria); background: var(--seg-base); }
     .soltar strong { display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 17px; margin-bottom: 4px; }
@@ -78,16 +100,21 @@
     tbody tr:hover td { background: var(--seg-superficie); }
     tr.perdida td:first-child { border-left: 4px solid var(--seg-destaque); }
     .legenda { font-size: 12px; margin: 6px 0 0; }
+
+    /* 02: planos */
     .abas { display: flex; border-bottom: 2px solid var(--seg-primaria); margin-top: 6px; }
     .abas button { background: var(--seg-base); color: var(--seg-primaria); padding: 8px 16px; }
     .abas button[aria-selected=true] { background: var(--seg-primaria); color: var(--inteli-branco); }
     .aba { display: none; padding-top: 10px; }
     .aba.ativa { display: block; }
+
+    /* 04: a equipe */
     .chat { display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 680px; position: sticky; top: 16px; }
     .equipe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
     @media (max-width: 560px) { .equipe { grid-template-columns: 1fr; } }
     .agente { border: 1px solid var(--seg-borda); padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; position: relative; overflow: hidden; transition: border-color .3s; }
-    .avatar { grid-row: span 3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--seg-primaria); color: var(--inteli-branco); position: relative; }
+    .avatar { grid-row: span 3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+              background: var(--seg-primaria); color: var(--inteli-branco); position: relative; }
     .avatar .material-symbols-outlined { font-size: 24px; }
     .agente[data-agente=vera] .avatar { background: var(--seg-secundaria); }
     .agente[data-agente=ciro] .avatar { background: var(--seg-destaque); }
@@ -95,8 +122,10 @@
     .agente .papel { font-size: 12px; }
     .agente .estado { font-size: 12px; font-weight: 600; display: flex; gap: 4px; align-items: center; }
     .agente.trabalhando { border-color: var(--seg-secundaria); }
-    .agente.trabalhando .avatar::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--seg-secundaria); animation: pulso 1.2s ease-out infinite; }
-    .agente.trabalhando::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--seg-secundaria), transparent); animation: varrer 1.4s linear infinite; }
+    .agente.trabalhando .avatar::after { content: ""; position: absolute; inset: -5px; border-radius: 50%;
+      border: 2px solid var(--seg-secundaria); animation: pulso 1.2s ease-out infinite; }
+    .agente.trabalhando::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--seg-secundaria), transparent); animation: varrer 1.4s linear infinite; }
     .agente.pronto .estado { color: var(--seg-secundaria); }
     .pontos span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-left: 2px; animation: ponto 1s infinite; }
     .pontos span:nth-child(2) { animation-delay: .15s; } .pontos span:nth-child(3) { animation-delay: .3s; }
@@ -108,11 +137,13 @@
     .msg.eu { align-self: flex-end; background: var(--seg-primaria); color: var(--inteli-branco); }
     .msg.agente-msg { align-self: flex-start; background: var(--seg-superficie); border-left: 4px solid var(--seg-primaria); }
     .msg.agente-msg[data-agente=vera] { border-left-color: var(--seg-secundaria); }
-    .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base); border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
+    .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base);
+      border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
     .msg.agente-msg[data-agente=guardiao], .msg.agente-msg[data-agente=guardião] { border-left-color: var(--inteli-coral); }
     .msg .quem { display: flex; gap: 6px; align-items: center; font-weight: 700; font-size: 13px; margin-bottom: 4px; white-space: normal; }
     .msg .quem small { font-weight: 500; }
-    .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto; background: var(--seg-secundaria); color: var(--inteli-branco); }
+    .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto;
+            background: var(--seg-secundaria); color: var(--inteli-branco); }
     .selo.corrigido { background: var(--seg-destaque); }
     .msg.aviso { align-self: center; font-size: 13px; background: transparent; padding: 4px; text-align: center; }
     .msg.rodape { align-self: flex-start; font-size: 12px; padding: 0 2px; }
@@ -121,6 +152,7 @@
     .enviar { display: flex; gap: 8px; }
     .enviar textarea { min-height: 52px; height: 52px; }
     footer { text-align: center; font-size: 13px; padding: 0 16px 32px; }
+
     @keyframes girar { to { transform: rotate(360deg); } }
     @keyframes pulso { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
     @keyframes varrer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
@@ -142,6 +174,7 @@
       <li id="t4"><span class="n">4</span>Conversa com a equipe</li>
     </ol></nav>
   </header>
+
   <main>
     <div class="coluna">
       <section class="bloco" id="bloco-planilha">
@@ -197,45 +230,19 @@
         </div>
       </section>
 
-      <!-- BLOCO 02: PLANOS DE AÇÃO E PERSONAS -->
       <section class="bloco" id="bloco-planos">
-        <h2><span class="num">02</span>Planos de ação e Personas (Fixos)</h2>
-        <p class="ajuda">A Vera, estrategista da equipe, analisará as contas baseada nos SLAs por persona e nos planos abaixo.</p>
+        <h2><span class="num">02</span>Planos de ação por área</h2>
+        <p class="ajuda">A Vera, estrategista da equipe, só recomenda o que estiver escrito aqui. Os textos são exemplos: substitua pelo plano do grupo, com o limiar numérico de cada item.</p>
         <div class="abas" role="tablist">
           <button type="button" role="tab" aria-selected="true" data-aba="comercial">Comercial</button>
           <button type="button" role="tab" aria-selected="false" data-aba="atendimento">Atendimento</button>
           <button type="button" role="tab" aria-selected="false" data-aba="posvendas">Pós-vendas</button>
-          <button type="button" role="tab" aria-selected="false" data-aba="personas">Personas e SLAs</button>
         </div>
-        <div class="aba ativa" data-aba="comercial">
-          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
-            <strong>1. Contas P1 (Champions Recorrentes):</strong> Ao atingir o Dia 30 sem nova compra, acionar o KAM para atendimento dedicado e agendamento da QBR.<br>
-            <strong>2. Contas P2 (Grandes Projetos Capex):</strong> Ao atingir o Dia 150 desde o último grande projeto, iniciar o mapeamento do próximo ciclo orçamentário.<br>
-            <strong>3. Contas P4:</strong> Nenhuma condição comercial ou tempo de vendedor deve ser alocado (apenas modelo self-service).
-          </div>
-        </div>
-        <div class="aba" data-aba="atendimento">
-          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
-            <strong>1. Contas P3 (Pequenos Recorrentes):</strong> Ao atingir o Dia 90 sem compra, acionar automação via CRM para ofertas casadas (cross-sell).<br>
-            <strong>2. Contas P4 (Transacionais de Cauda):</strong> Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar ao e-commerce.<br>
-            <strong>3. CRM:</strong> Registrar todo o resultado das automações P3 e interações no portal digital P4.
-          </div>
-        </div>
-        <div class="aba" data-aba="posvendas">
-          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
-            <strong>1. Contas P2:</strong> Oferecer suporte técnico avançado (Premier Support) durante a janela de inatividade (9 a 10 meses).<br>
-            <strong>2. Contas P1:</strong> Acompanhar satisfação de uso do ecossistema multicesta nas QBRs para garantir qualidade de suporte.
-          </div>
-        </div>
-        <div class="aba" data-aba="personas">
-          <div style="background: var(--seg-superficie); padding: 12px; border: 1px solid var(--seg-borda); font-size: 14px; line-height: 1.5;">
-            <strong>P1 (Champions):</strong> Receita ≥ US$ 52.827 | P85 SLA: 20 dias<br>
-            <strong>P2 (Grandes Projetos):</strong> Receita ≥ US$ 52.827 | P85 SLA: 120 dias<br>
-            <strong>P3 (Pequ. Recorrentes):</strong> Receita &lt; US$ 52.827 | P85 SLA: 40 dias<br>
-            <strong>P4 (Cauda):</strong> Receita &lt; US$ 52.827 | P85 SLA: 290 dias
-          </div>
-        </div>
-        <div class="linha"><span class="status">Estes planos são fixos e enviados automaticamente à equipe de agentes.</span></div>
+        <div class="aba ativa" data-aba="comercial"><textarea id="plano-comercial" aria-label="Plano da área comercial"></textarea></div>
+        <div class="aba" data-aba="atendimento"><textarea id="plano-atendimento" aria-label="Plano da área de atendimento"></textarea></div>
+        <div class="aba" data-aba="posvendas"><textarea id="plano-posvendas" aria-label="Plano da área de pós-vendas"></textarea></div>
+        <div class="linha"><button id="restaurar" class="secundario" type="button">Restaurar exemplos</button>
+          <span class="status">Os planos ficam salvos neste navegador.</span></div>
       </section>
 
       <section class="bloco" id="bloco-conexao">
@@ -250,6 +257,7 @@
         </div>
       </section>
     </div>
+
     <div class="coluna">
       <section class="bloco chat">
         <h2><span class="num">04</span>Conversa com a equipe de agentes</h2>
@@ -296,22 +304,20 @@
     </div>
   </main>
   <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia &middot; Deivison Raijan, Fábio Pimentel, Fábio Pirotta, Felipe Santos, Marcos Moura, Rafael Moritz</footer>
+
   <script src="modelo.js"></script>
   <script>
   (function () {
     "use strict";
-
-    var PLANOS_FIXOS = {
-      comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
-      atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
-      posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proativamente o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
-      personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US\$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US\$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US\$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US\$ 52.827\",\"290 dias\""
+    var PLANOS_EXEMPLO = {
+      comercial: "Exemplo, substitua pelo plano do grupo.\n1. Conta com valor esperado acima de USD 500 mil: ligação do Account Manager em até 5 dias úteis, com revisão do mix comprado nos últimos 12 meses.\n2. Conta com receita dos 12 meses abaixo de metade do pico anual: proposta de renovação do parque instalado, sem desconto fora da tabela vigente.\n3. Nenhuma condição comercial é oferecida sem aprovação do gerente regional.",
+      atendimento: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 4 meses ou mais desde a última compra: contato do time de atendimento para verificar chamados abertos e satisfação.\n2. Registrar no CRM o motivo informado pelo cliente.\n3. Escalar ao Comercial quando o cliente citar concorrente.",
+      posvendas: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 3 meses ou menos de compra nos últimos 12: revisão técnica do parque e da garantia.\n2. Conta com contrato de serviço a vencer em 90 dias: oferta de extensão de garantia pela tabela vigente.\n3. Registrar no CRM toda visita técnica feita a conta da fila."
     };
-
     var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
-    var AREAS = ["comercial", "atendimento", "posvendas", "personas"];
+    var AREAS = ["comercial", "atendimento", "posvendas"];
 
-    var \$ = function (id) { return document.getElementById(id); };
+    var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
     var resultado = null;
     var sessao = "painel-" + Math.random().toString(36).slice(2, 10);
@@ -327,19 +333,18 @@
       if (Math.abs(v) >= 1e3) return dec(v / 1e3, 1) + " mil";
       return fmt.format(v);
     }
-    
     function trilha() {
       $("t1").classList.toggle("feito", !!resultado);
-      $("t2").classList.toggle("feito", true); // Planos agora são sempre fixos e preenchidos
-      \$("t3").classList.toggle("feito", \$("status-conexao").classList.contains("ok"));
+      $("t2").classList.toggle("feito", AREAS.every(function (a) { return $("plano-" + a).value.trim(); }));
+      $("t3").classList.toggle("feito", $("status-conexao").classList.contains("ok"));
     }
 
+    // ---- 01 planilha e modelo
     function etapa(nome, estado) {
       var li = document.querySelector('#etapas li[data-e="' + nome + '"]');
       li.className = estado;
       li.querySelector(".material-symbols-outlined").textContent = estado === "feita" ? "check_circle" : "progress_activity";
     }
-    
     function carregar(arquivo) {
       $("nome-arquivo").className = "status";
       $("nome-arquivo").textContent = arquivo.name;
@@ -366,16 +371,15 @@
               l.periodo = yyyy + "-" + mm;
             }
           });
-          
+
           var faltam = ["account_id", "periodo", "churn_label", "receita_usd", "qtd_pedidos"]
+
             .filter(function (c) { return !(linhas[0] && c in linhas[0]); });
           if (faltam.length) throw new Error("faltam as colunas " + faltam.join(", ") + ". Use a aba Dataset 1 da base do case.");
-          
           $("nome-arquivo").className = "status ok";
           $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
           var sel = $("filtro-segmento");
           if (sel) { sel.innerHTML = '<option value="Todos">Todos</option>'; }
-          
           etapa("ler", "feita"); etapa("colunas", "ativa");
           return espera(350);
         }).then(function () {
@@ -393,11 +397,10 @@
           $("etapas").classList.remove("visivel");
         });
       };
-      
       if (arquivo.name.toLowerCase().endsWith(".csv")) leitor.readAsText(arquivo, "utf-8");
       else leitor.readAsArrayBuffer(arquivo);
     }
-    
+
     function calcular() {
       if (!linhas.length) return;
       var rCompleto = KovanModelo.rodar(linhas, linhas.length);
@@ -430,11 +433,9 @@
         acertos_fila: fila.reduce(function (a, c) { return a + c.churn; }, 0),
         valor_esperado_fila: fila.reduce(function (a, c) { return a + c.valor_esperado; }, 0)
       };
-      
-      window.KOVAN = resultado;
+      window.KOVAN = resultado;   // para o teste e para quem quiser inspecionar no console
       KovanModelo.guardar(KovanModelo.contexto(resultado));
       var r = resultado;
-      
       $("resumo").hidden = false;
       $("k-contas").textContent = fmt.format(r.contas);
       $("k-auc").textContent = dec(r.auc, 3);
@@ -443,7 +444,6 @@
       
       var receitaTotal = filaFiltrada.reduce(function(a, c) { return a + (c.valor_em_risco || 0); }, 0);
       var receitaRisco = filaFiltrada.reduce(function(a, c) { return a + (c.valor_esperado || 0); }, 0);
-      
       // NRR = Receita Total 12m Projetada (Receita atual 12m menos perda) / Receita Base 12m Anteriores
       var receitaAnterior = filaFiltrada.reduce(function(a, c) { return a + (c.receita_12m_anterior || c.receita_12m_anterior_usd || 0); }, 0);
       var nrr = receitaAnterior > 0 ? ((receitaTotal - receitaRisco) / receitaAnterior) * 100 : 0;
@@ -451,15 +451,12 @@
       $("k-receita-total").textContent = compacto(receitaTotal);
       $("k-receita-risco").textContent = compacto(receitaRisco);
       $("k-nrr").textContent = dec(nrr, 1) + "%";
-      
       var topo10 = r.fila.slice(0, 10);
       var maxVal = Math.max.apply(null, topo10.map(function(x) { return x.valor_esperado; }));
       var svgW = 600;
       var svgH = 40 + topo10.length * 25;
-      
       var svgHtml = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" height="' + svgH + '" style="display: block; margin-top: 16px;">';
       svgHtml += '<text x="0" y="20" font-family="var(--fonte-texto)" font-size="14" font-weight="600" fill="var(--inteli-roxo)">Top 10 contas por valor esperado</text>';
-      
       topo10.forEach(function(l, idx) {
         var w = maxVal > 0 ? (l.valor_esperado / maxVal) * 400 : 0;
         var y = 35 + idx * 25;
@@ -469,7 +466,6 @@
       });
       svgHtml += '</svg>';
       $("grafico-topo10").innerHTML = svgHtml;
-      
       var maior = Math.max.apply(null, KovanModelo.COLUNAS.map(function (c) { return Math.abs(r.pesos[c]); }));
       $("pesos").innerHTML = KovanModelo.COLUNAS.map(function (c) {
         var v = r.pesos[c];
@@ -477,16 +473,13 @@
                "\" style=\"width:0\" data-l=\"" + (Math.abs(v) / maior * 50).toFixed(1) + "%\"></span></div><span>" +
                (v > 0 ? "+" : "") + dec(v, 2) + "</span>";
       }).join("");
-      
       setTimeout(function () {
         document.querySelectorAll("#pesos .barra span").forEach(function (s) { s.style.width = s.dataset.l; });
       }, 50);
-      
       var cols = [["posicao", "Pos."], ["account_id", "Conta"], ["segment", "Segmento"], ["escore", "Escore"],
                   ["valor_em_risco", "Receita 12m"], ["valor_esperado", "Valor esperado"],
                   ["meses_desde_ultima_compra", "Meses sem compra"], ["meses_com_compra_12m", "Meses com compra"]];
       var html = "<thead><tr>" + cols.map(function (c) { return "<th>" + c[1] + "</th>"; }).join("") + "</tr></thead><tbody>";
-      
       r.fila.forEach(function (l) {
         html += "<tr data-conta=\"" + esc(l.account_id) + "\"" + (l.churn ? " class=\"perdida\"" : "") + ">" + cols.map(function (c) {
           var v = l[c[0]];
@@ -495,17 +488,14 @@
           return "<td>" + esc(v) + "</td>";
         }).join("") + "</tr>";
       });
-      
       $("tabela").innerHTML = html + "</tbody>";
       var btnExp = $("exportar-csv");
       if (btnExp) btnExp.disabled = false;
       aviso_chat("Modelo treinado: " + fmt.format(r.contas) + " contas, AUC " + dec(r.auc, 3) + ". Fila de " + r.fila.length + " contas pronta para a equipe.");
       trilha();
     }
-    
     $("capacidade").addEventListener("change", calcular);
     $("filtro-segmento").addEventListener("change", calcular);
-    
     $("exportar-csv").addEventListener("click", function() {
       if (!resultado || !resultado.fila) return;
       var c = KovanModelo.contexto(resultado).contas;
@@ -529,14 +519,12 @@
       link.click();
       document.body.removeChild(link);
     });
-    
     $("tabela").addEventListener("click", function (e) {
       var tr = e.target.closest("tr[data-conta]");
       if (!tr) return;
       $("pergunta").value = "Explique por que a conta " + tr.dataset.conta + " está na fila e qual área deve agir.";
       $("pergunta").focus();
     });
-    
     var zona = $("soltar");
     zona.addEventListener("click", function () { $("arquivo").click(); });
     zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") $("arquivo").click(); });
@@ -544,19 +532,24 @@
     ["dragenter", "dragover"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add("ativo"); }); });
     ["dragleave", "drop"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove("ativo"); }); });
     zona.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) carregar(e.dataTransfer.files[0]); });
-    
+
     function contexto() { return KovanModelo.contexto(resultado); }
     window.KovanContexto = function () { return resultado ? contexto() : null; };
 
+    // ---- 02 planos
+    AREAS.forEach(function (a) {
+      var t = $("plano-" + a);
+      t.value = ler("kovan-plano-" + a) || PLANOS_EXEMPLO[a];
+      t.addEventListener("input", function () { gravar("kovan-plano-" + a, t.value); trilha(); });
+    });
     function planos() {
-      return { 
-        comercial: PLANOS_FIXOS.comercial, 
-        atendimento: PLANOS_FIXOS.atendimento,
-        "pós-vendas": PLANOS_FIXOS.posvendas, 
-        personas: PLANOS_FIXOS.personas 
-      };
+      return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value,
+               "pós-vendas": $("plano-posvendas").value };
     }
-    
+    $("restaurar").addEventListener("click", function () {
+      AREAS.forEach(function (a) { $("plano-" + a).value = PLANOS_EXEMPLO[a]; gravar("kovan-plano-" + a, PLANOS_EXEMPLO[a]); });
+      trilha();
+    });
     document.querySelectorAll(".abas button").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
@@ -564,6 +557,7 @@
       });
     });
 
+    // ---- modelo de linguagem
     var sel = $("modelo-llm");
     var salvo = ler("kovan-modelo-llm");
     if (salvo && sel.querySelector('option[value="' + salvo + '"]')) sel.value = salvo;
@@ -574,6 +568,7 @@
     $("modelo-outro").addEventListener("change", function () { gravar("kovan-modelo-outro", this.value.trim()); });
     function modeloLLM() { return sel.value === "outro" ? $("modelo-outro").value.trim() : sel.value; }
 
+    // ---- 03 conexão
     $("endpoint").value = ler("kovan-endpoint") || "";
     $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
     function chamar(pergunta) {
@@ -589,7 +584,6 @@
         return r.json();
       }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
-    
     $("testar").addEventListener("click", function () {
       var s = $("status-conexao");
       s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
@@ -598,6 +592,7 @@
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
+    // ---- 04 a equipe
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
       el.classList.remove("trabalhando", "pronto");
@@ -606,7 +601,9 @@
       else if (estado === "pronto") { el.classList.add("pronto"); rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> concluído'; }
       else rotulo.textContent = "aguardando";
     }
-    
+    /* O n8n devolve a resposta dos três de uma vez. Enquanto ela não chega, o
+       painel acende o agente que provavelmente está trabalhando: a ordem é a
+       do workflow, o tempo de cada um é estimativa. */
     function animarEquipe() {
       var i = 0;
       AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
@@ -616,28 +613,24 @@
       }, 5000);
       return function () { clearInterval(id); };
     }
-    
     function bolha(classe, texto) {
       var d = document.createElement("div");
       d.className = "msg " + classe; d.textContent = texto;
-      \$("mensagens").appendChild(d); \$("mensagens").scrollTop = $("mensagens").scrollHeight;
+      $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight;
       return d;
     }
-    
     function aviso_chat(t) { bolha("aviso", t); }
-    
     function digitar(el, texto) {
       var i = 0, passo = Math.max(2, Math.round(texto.length / 60));
       return new Promise(function (ok) {
         (function vai() {
           i = Math.min(texto.length, i + passo);
           el.textContent = texto.slice(0, i);
-          \$("mensagens").scrollTop = \$("mensagens").scrollHeight;
+          $("mensagens").scrollTop = $("mensagens").scrollHeight;
           if (i < texto.length) setTimeout(vai, 16); else ok();
         })();
       });
     }
-    
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
       var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
@@ -657,18 +650,14 @@
       $("mensagens").appendChild(d);
       return digitar(d.querySelector(".corpo"), texto);
     }
-    
     function perguntar(texto) {
       texto = texto.trim();
       if (!texto) return;
       if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 antes de perguntar."); return; }
-      
       bolha("eu", texto);
       $("pergunta").value = "";
       $("enviar").disabled = true;
-      
       var parar = animarEquipe(), t0 = performance.now(), modelo = modeloLLM();
-      
       chamar(texto).then(function (r) {
         parar();
         var agentes = r && r.agentes ? r.agentes : [{ nome: "Agente", papel: "", texto: (r && (r.resposta || r.output)) || JSON.stringify(r) }];
@@ -695,16 +684,13 @@
         $("t4").classList.add("feito");
       });
     }
-    
-    \$("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar(\$("pergunta").value); });
+    $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
     $("pergunta").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); }
     });
-    
     document.querySelectorAll("#sugestoes button").forEach(function (b) {
       b.addEventListener("click", function () { perguntar(b.textContent); });
     });
-    
     trilha();
   })();
   </script>
