@@ -71,6 +71,7 @@
       saida.push({
         account_id: id, segment: c.segment, country: c.country, churn: c.churn,
         receita_12m: c.r12,
+        receita_12m_anterior: c.r24,
         meses_desde_ultima_compra: corte - ultimo,
         meses_com_compra_12m: ms.filter(function (m) { return m > corte - 12; }).length,
         log_receita_12m: Math.log1p(Math.max(c.r12, 0)),
@@ -207,6 +208,7 @@
           posicao_na_fila: l.posicao, account_id: l.account_id, segmento: l.segment, pais: l.country,
           escore_de_perda: +l.escore.toFixed(3),
           receita_12m_usd: Math.round(l.valor_em_risco), valor_esperado_usd: Math.round(l.valor_esperado),
+          receita_12m_anterior_usd: Math.round(l.receita_12m_anterior || 0),
           meses_desde_ultima_compra: l.meses_desde_ultima_compra,
           meses_com_compra_nos_ultimos_12: l.meses_com_compra_12m,
           receita_12m_dividida_pela_dos_12m_anteriores: +l.razao_receita_12m.toFixed(2),

@@ -139,6 +139,7 @@
     .msg.agente-msg[data-agente=vera] { border-left-color: var(--seg-secundaria); }
     .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base);
       border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
+    .msg.agente-msg[data-agente=guardiao], .msg.agente-msg[data-agente=guardião] { border-left-color: var(--inteli-coral); }
     .msg .quem { display: flex; gap: 6px; align-items: center; font-weight: 700; font-size: 13px; margin-bottom: 4px; white-space: normal; }
     .msg .quem small { font-weight: 500; }
     .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto;
@@ -163,7 +164,7 @@
 <body>
   <header class="topo">
     <div class="topo-linha">
-      <h1>Painel de retenção Kovan LATAM</h1>
+      <h1>Painel de retenção Kovan, grupo 2</h1>
       <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Aula 08</p>
     </div>
     <nav class="trilha" aria-label="Passos do painel"><ol>
@@ -193,6 +194,9 @@
         <div class="linha">
           <label for="capacidade" style="margin:0">Capacidade do ciclo, em contas</label>
           <input id="capacidade" type="number" min="10" max="500" value="138">
+          <label for="filtro-segmento" style="margin:0; margin-left:12px">Segmento</label>
+          <select id="filtro-segmento" style="width: auto;"><option value="Todos">Todos</option></select>
+          <button id="exportar-csv" class="secundario" type="button" style="margin-left: 12px; padding: 6px 12px;" disabled><span class="material-symbols-outlined">download</span>Exportar CSV</button>
         </div>
         <div id="resumo" hidden>
           <div class="kpis">
@@ -200,6 +204,21 @@
             <div class="kpi"><h4 class="v" id="k-auc">-</h4><p class="r">AUC fora da amostra</p></div>
             <div class="kpi"><h4 class="v" id="k-acertos">-</h4><p class="r">perdidas na fila</p></div>
             <div class="kpi"><h4 class="v" id="k-esperado">-</h4><p class="r">valor esperado da fila, USD</p></div>
+          </div>
+          <div id="grafico-topo10" style="margin-top: 24px;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 24px;">
+            <div class="kpi" style="flex: 1; max-width: 320px; border-left-color: var(--inteli-coral); margin-top: 0;">
+              <h4 class="v" id="k-receita-total">-</h4>
+              <p class="r">Receita total da base<br><small>(Mar/23 a Fev/24)</small></p>
+            </div>
+            <div class="kpi" style="flex: 1; max-width: 320px; border-left-color: var(--inteli-coral); margin-top: 0;">
+              <h4 class="v" id="k-receita-risco">-</h4>
+              <p class="r">Receita em risco<br><small>(Mar/23 a Fev/24)</small></p>
+            </div>
+            <div class="kpi" style="flex: 1; max-width: 320px; border-left-color: var(--inteli-coral); margin-top: 0;">
+              <h4 class="v" id="k-nrr">-</h4>
+              <p class="r">NRR projetado<br><small>(vs. Mar/22 a Fev/23)</small></p>
+            </div>
           </div>
           <details>
             <summary>Peso de cada coluna no modelo</summary>
@@ -243,13 +262,15 @@
       <section class="bloco chat">
         <h2><span class="num">04</span>Conversa com a equipe de agentes</h2>
         <p class="ajuda">Cada pergunta passa por três agentes, em sequência, no n8n. Cada um usa o modelo de linguagem escolhido abaixo.</p>
-        <div class="equipe">
+        <div class="equipe" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
           <div class="agente" data-agente="atlas"><div class="avatar"><span class="material-symbols-outlined">query_stats</span></div>
             <span class="nome">Atlas</span><span class="papel">Analista da fila</span><span class="estado">aguardando</span></div>
           <div class="agente" data-agente="vera"><div class="avatar"><span class="material-symbols-outlined">flag</span></div>
             <span class="nome">Vera</span><span class="papel">Estrategista</span><span class="estado">aguardando</span></div>
           <div class="agente" data-agente="ciro"><div class="avatar"><span class="material-symbols-outlined">fact_check</span></div>
             <span class="nome">Ciro</span><span class="papel">Revisor</span><span class="estado">aguardando</span></div>
+          <div class="agente" data-agente="guardiao"><div class="avatar" style="background: var(--inteli-coral);"><span class="material-symbols-outlined">security</span></div>
+            <span class="nome">Guardião</span><span class="papel">Segurança</span><span class="estado">aguardando</span></div>
         </div>
         <div class="modelo-linha">
           <div>
@@ -282,7 +303,7 @@
       </section>
     </div>
   </main>
-  <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia</footer>
+  <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia &middot; Deivison Raijan, Fábio Pimentel, Fábio Pirotta, Felipe Santos, Marcos Moura, Rafael Moritz</footer>
 
   <script src="modelo.js"></script>
   <script>
@@ -293,7 +314,7 @@
       atendimento: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 4 meses ou mais desde a última compra: contato do time de atendimento para verificar chamados abertos e satisfação.\n2. Registrar no CRM o motivo informado pelo cliente.\n3. Escalar ao Comercial quando o cliente citar concorrente.",
       posvendas: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 3 meses ou menos de compra nos últimos 12: revisão técnica do parque e da garantia.\n2. Conta com contrato de serviço a vencer em 90 dias: oferta de extensão de garantia pela tabela vigente.\n3. Registrar no CRM toda visita técnica feita a conta da fila."
     };
-    var AGENTES = ["atlas", "vera", "ciro"];
+    var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
     var AREAS = ["comercial", "atendimento", "posvendas"];
 
     var $ = function (id) { return document.getElementById(id); };
@@ -344,6 +365,8 @@
           if (faltam.length) throw new Error("faltam as colunas " + faltam.join(", ") + ". Use a aba Dataset 1 da base do case.");
           $("nome-arquivo").className = "status ok";
           $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
+          var sel = $("filtro-segmento");
+          if (sel) { sel.innerHTML = '<option value="Todos">Todos</option>'; }
           etapa("ler", "feita"); etapa("colunas", "ativa");
           return espera(350);
         }).then(function () {
@@ -367,8 +390,36 @@
 
     function calcular() {
       if (!linhas.length) return;
+      var rCompleto = KovanModelo.rodar(linhas, linhas.length);
+      
+      var sel = $("filtro-segmento");
+      if (sel && sel.options.length === 1) {
+        var segmentosPossiveis = ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"];
+        segmentosPossiveis.forEach(function(s) {
+          var opt = document.createElement("option");
+          opt.value = s; opt.textContent = s;
+          sel.appendChild(opt);
+        });
+      }
+      
+      var seg = sel ? sel.value : "Todos";
+      var filaFiltrada = rCompleto.fila;
+      if (seg !== "Todos") {
+        filaFiltrada = filaFiltrada.filter(function(l) { return l.segment === seg; });
+      }
+      
       var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
-      resultado = KovanModelo.rodar(linhas, cap);
+      var fila = filaFiltrada.slice(0, cap);
+      
+      resultado = {
+        contas: rCompleto.contas,
+        perdidas: rCompleto.perdidas,
+        auc: rCompleto.auc,
+        pesos: rCompleto.pesos,
+        fila: fila,
+        acertos_fila: fila.reduce(function (a, c) { return a + c.churn; }, 0),
+        valor_esperado_fila: fila.reduce(function (a, c) { return a + c.valor_esperado; }, 0)
+      };
       window.KOVAN = resultado;   // para o teste e para quem quiser inspecionar no console
       KovanModelo.guardar(KovanModelo.contexto(resultado));
       var r = resultado;
@@ -377,6 +428,31 @@
       $("k-auc").textContent = dec(r.auc, 3);
       $("k-acertos").textContent = r.acertos_fila + " de " + r.fila.length;
       $("k-esperado").textContent = compacto(r.valor_esperado_fila);
+      
+      var receitaTotal = filaFiltrada.reduce(function(a, c) { return a + (c.valor_em_risco || 0); }, 0);
+      var receitaRisco = filaFiltrada.reduce(function(a, c) { return a + (c.valor_esperado || 0); }, 0);
+      // NRR = Receita Total 12m Projetada (Receita atual 12m menos perda) / Receita Base 12m Anteriores
+      var receitaAnterior = filaFiltrada.reduce(function(a, c) { return a + (c.receita_12m_anterior || c.receita_12m_anterior_usd || 0); }, 0);
+      var nrr = receitaAnterior > 0 ? ((receitaTotal - receitaRisco) / receitaAnterior) * 100 : 0;
+      
+      $("k-receita-total").textContent = compacto(receitaTotal);
+      $("k-receita-risco").textContent = compacto(receitaRisco);
+      $("k-nrr").textContent = dec(nrr, 1) + "%";
+      var topo10 = r.fila.slice(0, 10);
+      var maxVal = Math.max.apply(null, topo10.map(function(x) { return x.valor_esperado; }));
+      var svgW = 600;
+      var svgH = 40 + topo10.length * 25;
+      var svgHtml = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" width="100%" height="' + svgH + '" style="display: block; margin-top: 16px;">';
+      svgHtml += '<text x="0" y="20" font-family="var(--fonte-texto)" font-size="14" font-weight="600" fill="var(--inteli-roxo)">Top 10 contas por valor esperado</text>';
+      topo10.forEach(function(l, idx) {
+        var w = maxVal > 0 ? (l.valor_esperado / maxVal) * 400 : 0;
+        var y = 35 + idx * 25;
+        svgHtml += '<text x="80" y="' + (y + 14) + '" font-family="var(--fonte-mono)" font-size="13" fill="var(--inteli-roxo)" text-anchor="end">' + esc(l.account_id) + '</text>';
+        svgHtml += '<rect x="90" y="' + y + '" width="' + w + '" height="18" fill="var(--inteli-verde-escuro)"></rect>';
+        svgHtml += '<text x="' + (100 + w) + '" y="' + (y + 14) + '" font-family="var(--fonte-texto)" font-size="13" fill="var(--inteli-cinza-escuro)">USD ' + compacto(l.valor_esperado) + '</text>';
+      });
+      svgHtml += '</svg>';
+      $("grafico-topo10").innerHTML = svgHtml;
       var maior = Math.max.apply(null, KovanModelo.COLUNAS.map(function (c) { return Math.abs(r.pesos[c]); }));
       $("pesos").innerHTML = KovanModelo.COLUNAS.map(function (c) {
         var v = r.pesos[c];
@@ -400,10 +476,36 @@
         }).join("") + "</tr>";
       });
       $("tabela").innerHTML = html + "</tbody>";
+      var btnExp = $("exportar-csv");
+      if (btnExp) btnExp.disabled = false;
       aviso_chat("Modelo treinado: " + fmt.format(r.contas) + " contas, AUC " + dec(r.auc, 3) + ". Fila de " + r.fila.length + " contas pronta para a equipe.");
       trilha();
     }
     $("capacidade").addEventListener("change", calcular);
+    $("filtro-segmento").addEventListener("change", calcular);
+    $("exportar-csv").addEventListener("click", function() {
+      if (!resultado || !resultado.fila) return;
+      var c = KovanModelo.contexto(resultado).contas;
+      if (!c.length) return;
+      var cols = Object.keys(c[0]);
+      var csvRows = [cols.join(",")];
+      c.forEach(function(l) {
+        var row = cols.map(function(col) {
+          var val = l[col];
+          if (typeof val === "string") return '"' + val.replace(/"/g, '""') + '"';
+          return val;
+        });
+        csvRows.push(row.join(","));
+      });
+      var blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "kovan_fila_exportada.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
     $("tabela").addEventListener("click", function (e) {
       var tr = e.target.closest("tr[data-conta]");
       if (!tr) return;
@@ -518,7 +620,7 @@
     }
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
-      var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check" };
+      var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
       var d = document.createElement("div");
       d.className = "msg agente-msg"; d.dataset.agente = chave;
       var texto = String(a.texto || "");
@@ -550,11 +652,14 @@
         agentes.forEach(function (a) {
           cadeia = cadeia.then(function () {
             var chave = String(a.nome || "").toLowerCase();
-            if (AGENTES.indexOf(chave) >= 0) estadoAgente(chave, "pronto");
+            var normalize = chave;
+            if (normalize === "guardião") normalize = "guardiao";
+            if (AGENTES.indexOf(normalize) >= 0) estadoAgente(normalize, "pronto");
             return mensagemAgente(a);
           });
         });
         return cadeia.then(function () {
+          AGENTES.forEach(function (ag) { estadoAgente(ag, "pronto"); });
           bolha("rodape", "Equipe respondeu em " + Math.round((performance.now() - t0) / 1000) + " s, com " + (r.modelo || modelo) + ".");
         });
       }).catch(function (e) {
