@@ -334,12 +334,14 @@
   <script>
   (function () {
     "use strict";
+
     var PLANOS_FIXOS = {
       comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
       atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
       posvendas: "1. Expansão de Serviços (Contas P2): Durante a janela de inatividade orçamentária dos ciclos longos (9 a 10 meses), oferecer proativamente o suporte técnico avançado (Premier Support) para a infraestrutura já adquirida.\n2. Manutenção do Ecossistema (Contas P1): Acompanhar a satisfação de uso do ecossistema multicesta (Hardware Core, Periféricos e Servidores) durantes as QBRs, garantindo que o serviço de suporte atenda ao volume investido pela conta.",
       personas: "\"Persona\",\"Critério de Receita Anual\",\"P85 (Intervalo entre Compras)\"\n\"P1 (Champions)\",\">= US$ 52.827\",\"20 dias\"\n\"P2 (Grandes Projetos)\",\">= US$ 52.827\",\"120 dias\"\n\"P3 (Pequenos Recorrentes)\",\"< US$ 52.827\",\"40 dias\"\n\"P4 (Transacionais de Cauda)\",\"< US$ 52.827\",\"290 dias\""
     };
+
     var AGENTES = ["atlas", "vera", "ciro", "guardiao"];
     var AREAS = ["comercial", "atendimento", "posvendas", "personas"];
 
@@ -351,7 +353,6 @@
         personas: PLANOS_FIXOS.personas 
       };
     }
-
 
     var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
@@ -369,18 +370,19 @@
       if (Math.abs(v) >= 1e3) return dec(v / 1e3, 1) + " mil";
       return fmt.format(v);
     }
+
     function trilha() {
       $("t1").classList.toggle("feito", !!resultado);
       $("t2").classList.toggle("feito", true);
       $("t3").classList.toggle("feito", $("status-conexao").classList.contains("ok"));
     }
 
-    // ---- 01 planilha e modelo
     function etapa(nome, estado) {
       var li = document.querySelector('#etapas li[data-e="' + nome + '"]');
       li.className = estado;
       li.querySelector(".material-symbols-outlined").textContent = estado === "feita" ? "check_circle" : "progress_activity";
     }
+
     function carregar(arquivo) {
       $("nome-arquivo").className = "status";
       $("nome-arquivo").textContent = arquivo.name;
@@ -395,10 +397,9 @@
           var wb = csv ? XLSX.read(ev.target.result, { type: "string" })
                        : XLSX.read(new Uint8Array(ev.target.result), { type: "array", sheets: ["Dataset 1"], dense: true });
           var aba = wb.Sheets["Dataset 1"] || wb.Sheets[wb.SheetNames[0]];
-          
+
           linhas = XLSX.utils.sheet_to_json(aba, { defval: "", raw: true });
-          
-          // Tratamento para números seriais de data do Excel na base de 5 anos
+
           linhas.forEach(function(l) {
             if (typeof l.periodo === "number") {
               var d = new Date(Math.round((l.periodo - 25569) * 86400 * 1000));
@@ -408,14 +409,14 @@
             }
           });
 
-          var faltam = ["account_id", "periodo", "churn_label", "receita_usd", "qtd_pedidos"]
-
-            .filter(function (c) { return !(linhas[0] && c in linhas[0]); });
+          var faltam = ["account_id", "periodo", "churn_label", "receita_usd", "qtd_pedidos"].filter(function (c) { return !(linhas[0] && c in linhas[0]); });
           if (faltam.length) throw new Error("faltam as colunas " + faltam.join(", ") + ". Use a aba Dataset 1 da base do case.");
+          
           $("nome-arquivo").className = "status ok";
           $("nome-arquivo").textContent = arquivo.name + ": " + fmt.format(linhas.length) + " linhas da aba Dataset 1";
           var sel = $("filtro-segmento");
           if (sel) { sel.innerHTML = '<option value="Todos">Todos</option>'; }
+          
           etapa("ler", "feita"); etapa("colunas", "ativa");
           return espera(350);
         }).then(function () {
@@ -440,7 +441,6 @@
     function calcular() {
       if (!linhas.length) return;
       var rCompleto = KovanModelo.rodar(linhas, linhas.length);
-      
       var sel = $("filtro-segmento");
       if (sel && sel.options.length === 1) {
         var segmentosPossiveis = ["GLOBAL ACCOUNT", "LARGE ENTERPRISE", "MID MARKET", "PUBLIC SECTOR", "SMALL MARKET", "STRATEGIC ACCOUNT"];
@@ -450,16 +450,13 @@
           sel.appendChild(opt);
         });
       }
-      
       var seg = sel ? sel.value : "Todos";
       var filaFiltrada = rCompleto.fila;
       if (seg !== "Todos") {
         filaFiltrada = filaFiltrada.filter(function(l) { return l.segment === seg; });
       }
-      
       var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
       var fila = filaFiltrada.slice(0, cap);
-      
       resultado = {
         contas: rCompleto.contas,
         perdidas: rCompleto.perdidas,
@@ -469,7 +466,8 @@
         acertos_fila: fila.reduce(function (a, c) { return a + c.churn; }, 0),
         valor_esperado_fila: fila.reduce(function (a, c) { return a + c.valor_esperado; }, 0)
       };
-      window.KOVAN = resultado;   // para o teste e para quem quiser inspecionar no console
+      
+      window.KOVAN = resultado;
       KovanModelo.guardar(KovanModelo.contexto(resultado));
       var r = resultado;
       $("resumo").hidden = false;
@@ -480,13 +478,13 @@
       
       var receitaTotal = filaFiltrada.reduce(function(a, c) { return a + (c.valor_em_risco || 0); }, 0);
       var receitaRisco = filaFiltrada.reduce(function(a, c) { return a + (c.valor_esperado || 0); }, 0);
-      // NRR = Receita Total 12m Projetada (Receita atual 12m menos perda) / Receita Base 12m Anteriores
       var receitaAnterior = filaFiltrada.reduce(function(a, c) { return a + (c.receita_12m_anterior || c.receita_12m_anterior_usd || 0); }, 0);
       var nrr = receitaAnterior > 0 ? ((receitaTotal - receitaRisco) / receitaAnterior) * 100 : 0;
       
       $("k-receita-total").textContent = compacto(receitaTotal);
       $("k-receita-risco").textContent = compacto(receitaRisco);
       $("k-nrr").textContent = dec(nrr, 1) + "%";
+      
       var topo10 = r.fila.slice(0, 10);
       var maxVal = Math.max.apply(null, topo10.map(function(x) { return x.valor_esperado; }));
       var svgW = 600;
@@ -530,6 +528,7 @@
       aviso_chat("Modelo treinado: " + fmt.format(r.contas) + " contas, AUC " + dec(r.auc, 3) + ". Fila de " + r.fila.length + " contas pronta para a equipe.");
       trilha();
     }
+    
     $("capacidade").addEventListener("change", calcular);
     $("filtro-segmento").addEventListener("change", calcular);
     $("exportar-csv").addEventListener("click", function() {
@@ -555,12 +554,14 @@
       link.click();
       document.body.removeChild(link);
     });
+    
     $("tabela").addEventListener("click", function (e) {
       var tr = e.target.closest("tr[data-conta]");
       if (!tr) return;
       $("pergunta").value = "Explique por que a conta " + tr.dataset.conta + " está na fila e qual área deve agir.";
       $("pergunta").focus();
     });
+    
     var zona = $("soltar");
     zona.addEventListener("click", function () { $("arquivo").click(); });
     zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") $("arquivo").click(); });
@@ -568,15 +569,10 @@
     ["dragenter", "dragover"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add("ativo"); }); });
     ["dragleave", "drop"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove("ativo"); }); });
     zona.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) carregar(e.dataTransfer.files[0]); });
-
+    
     function contexto() { return KovanModelo.contexto(resultado); }
     window.KovanContexto = function () { return resultado ? contexto() : null; };
 
-    // ---- 02 planos
-    function planos() {
-      return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value,
-               "pós-vendas": $("plano-posvendas").value };
-    }
     document.querySelectorAll(".abas button").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
@@ -584,7 +580,6 @@
       });
     });
 
-    // ---- modelo de linguagem
     var sel = $("modelo-llm");
     var salvo = ler("kovan-modelo-llm");
     if (salvo && sel.querySelector('option[value="' + salvo + '"]')) sel.value = salvo;
@@ -595,9 +590,9 @@
     $("modelo-outro").addEventListener("change", function () { gravar("kovan-modelo-outro", this.value.trim()); });
     function modeloLLM() { return sel.value === "outro" ? $("modelo-outro").value.trim() : sel.value; }
 
-    // ---- 03 conexão
     $("endpoint").value = ler("kovan-endpoint") || "";
     $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
+
     function chamar(pergunta) {
       var url = $("endpoint").value.trim();
       if (!url) return Promise.reject(new Error("Configure o endpoint do n8n no bloco 03."));
@@ -611,6 +606,7 @@
         return r.json();
       }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
+
     $("testar").addEventListener("click", function () {
       var s = $("status-conexao");
       s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
@@ -619,7 +615,6 @@
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
-    // ---- 04 a equipe
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
       el.classList.remove("trabalhando", "pronto");
@@ -628,9 +623,7 @@
       else if (estado === "pronto") { el.classList.add("pronto"); rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> concluído'; }
       else rotulo.textContent = "aguardando";
     }
-    /* O n8n devolve a resposta dos três de uma vez. Enquanto ela não chega, o
-       painel acende o agente que provavelmente está trabalhando: a ordem é a
-       do workflow, o tempo de cada um é estimativa. */
+
     function animarEquipe() {
       var i = 0;
       AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
@@ -640,13 +633,16 @@
       }, 5000);
       return function () { clearInterval(id); };
     }
+
     function bolha(classe, texto) {
       var d = document.createElement("div");
       d.className = "msg " + classe; d.textContent = texto;
       $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight;
       return d;
     }
+
     function aviso_chat(t) { bolha("aviso", t); }
+
     function digitar(el, texto) {
       var i = 0, passo = Math.max(2, Math.round(texto.length / 60));
       return new Promise(function (ok) {
@@ -658,6 +654,7 @@
         })();
       });
     }
+
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
       var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check", guardiao: "security", guardião: "security" };
@@ -677,14 +674,18 @@
       $("mensagens").appendChild(d);
       return digitar(d.querySelector(".corpo"), texto);
     }
+
     function perguntar(texto) {
       texto = texto.trim();
       if (!texto) return;
       if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 antes de perguntar."); return; }
+      
       bolha("eu", texto);
       $("pergunta").value = "";
       $("enviar").disabled = true;
+      
       var parar = animarEquipe(), t0 = performance.now(), modelo = modeloLLM();
+      
       chamar(texto).then(function (r) {
         parar();
         var agentes = r && r.agentes ? r.agentes : [{ nome: "Agente", papel: "", texto: (r && (r.resposta || r.output)) || JSON.stringify(r) }];
@@ -711,13 +712,16 @@
         $("t4").classList.add("feito");
       });
     }
+
     $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
     $("pergunta").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); }
     });
+
     document.querySelectorAll("#sugestoes button").forEach(function (b) {
       b.addEventListener("click", function () { perguntar(b.textContent); });
     });
+
     trilha();
   })();
   </script>
