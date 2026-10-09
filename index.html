@@ -8,10 +8,6 @@
     Painel da Aula 08. Uma página, sem build: lê a planilha original do case,
     treina o modelo no navegador (modelo.js), guarda os planos de ação de cada
     área e conversa com uma equipe de três agentes no n8n.
-    Para criar a versão do grupo: a pasta frontend/ do repositório de prática
-    tem a mesma página pronta para abrir no Antigravity e modificar.
-    A planilha fica no navegador. Ao endpoint configurado vão só a fila do
-    ciclo, o resumo do modelo, os planos e o nome do modelo de linguagem.
   -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Platypi:wght@500;600&family=Space+Mono&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
@@ -21,24 +17,17 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--seg-superficie); color: var(--seg-texto); font-size: 16px; }
     a { color: var(--seg-secundaria); }
-    header.topo {
-      background: var(--seg-primaria); color: var(--inteli-branco);
-      padding: 18px 32px 0; border-bottom: 4px solid var(--seg-destaque);
-    }
+    header.topo { background: var(--seg-primaria); color: var(--inteli-branco); padding: 18px 32px 0; border-bottom: 4px solid var(--seg-destaque); }
     .topo-linha { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; max-width: 1320px; margin: 0 auto; }
     header.topo h1 { margin: 0; font-size: 28px; color: var(--inteli-branco); }
     header.topo p { margin: 0; font-size: 14px; }
-    /* Trilha dos quatro passos: cada um acende quando fica pronto. */
     .trilha { max-width: 1320px; margin: 16px auto 0; overflow-x: auto; }
     .trilha ol { display: flex; margin: 0; padding: 0; }
-    .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px;
-                 border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; }
-    .trilha .n { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-                 border: 2px solid var(--inteli-branco); font-weight: 700; font-size: 13px; flex: none; transition: background .4s; }
+    .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px; border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; }
+    .trilha .n { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--inteli-branco); font-weight: 700; font-size: 13px; flex: none; transition: background .4s; }
     .trilha li.feito { border-top-color: var(--seg-secundaria); }
     .trilha li.feito .n { background: var(--seg-secundaria); border-color: var(--seg-secundaria); }
-    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
-           display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
+    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
     @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
     .coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
     section.bloco { background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 20px 22px; }
@@ -46,17 +35,10 @@
     .bloco h2 .num { color: var(--seg-destaque); font-size: 15px; }
     .bloco .ajuda { margin: 0 0 14px; font-size: 14px; line-height: 1.5; }
     label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
-    input[type=url], input[type=text], textarea, select {
-      width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base);
-      border: 1px solid var(--seg-borda); padding: 10px 12px;
-    }
+    input[type=url], input[type=text], textarea, select { width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 10px 12px; }
     textarea { min-height: 110px; resize: vertical; font-size: 14px; line-height: 1.45; }
     input:focus, textarea:focus, select:focus { outline: 2px solid var(--seg-secundaria); outline-offset: -1px; }
-    button, a.botao {
-      font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px;
-      background: var(--seg-primaria); color: var(--inteli-branco); text-decoration: none;
-      display: inline-flex; gap: 8px; align-items: center;
-    }
+    button, a.botao { font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px; background: var(--seg-primaria); color: var(--inteli-branco); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
     button.secundario, a.botao { background: var(--seg-base); color: var(--seg-primaria); border: 1px solid var(--seg-primaria); }
     button:disabled { cursor: not-allowed; background: var(--seg-borda); color: var(--seg-texto); }
     .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
@@ -64,7 +46,6 @@
     .status.ok { color: var(--seg-secundaria); font-weight: 600; }
     .status.erro { color: var(--seg-destaque); font-weight: 600; }
     .material-symbols-outlined { font-size: 20px; }
-    /* 01: planilha */
     .soltar { border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer; background: var(--seg-superficie); transition: border-color .2s, background .2s; }
     .soltar:hover, .soltar.ativo { border-color: var(--seg-secundaria); background: var(--seg-base); }
     .soltar strong { display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 17px; margin-bottom: 4px; }
@@ -97,19 +78,16 @@
     tbody tr:hover td { background: var(--seg-superficie); }
     tr.perdida td:first-child { border-left: 4px solid var(--seg-destaque); }
     .legenda { font-size: 12px; margin: 6px 0 0; }
-    /* 02: planos */
     .abas { display: flex; border-bottom: 2px solid var(--seg-primaria); margin-top: 6px; }
     .abas button { background: var(--seg-base); color: var(--seg-primaria); padding: 8px 16px; }
     .abas button[aria-selected=true] { background: var(--seg-primaria); color: var(--inteli-branco); }
     .aba { display: none; padding-top: 10px; }
     .aba.ativa { display: block; }
-    /* 04: a equipe */
     .chat { display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 680px; position: sticky; top: 16px; }
     .equipe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
     @media (max-width: 560px) { .equipe { grid-template-columns: 1fr; } }
     .agente { border: 1px solid var(--seg-borda); padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; position: relative; overflow: hidden; transition: border-color .3s; }
-    .avatar { grid-row: span 3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-              background: var(--seg-primaria); color: var(--inteli-branco); position: relative; }
+    .avatar { grid-row: span 3; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--seg-primaria); color: var(--inteli-branco); position: relative; }
     .avatar .material-symbols-outlined { font-size: 24px; }
     .agente[data-agente=vera] .avatar { background: var(--seg-secundaria); }
     .agente[data-agente=ciro] .avatar { background: var(--seg-destaque); }
@@ -117,10 +95,8 @@
     .agente .papel { font-size: 12px; }
     .agente .estado { font-size: 12px; font-weight: 600; display: flex; gap: 4px; align-items: center; }
     .agente.trabalhando { border-color: var(--seg-secundaria); }
-    .agente.trabalhando .avatar::after { content: ""; position: absolute; inset: -5px; border-radius: 50%;
-      border: 2px solid var(--seg-secundaria); animation: pulso 1.2s ease-out infinite; }
-    .agente.trabalhando::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
-      background: linear-gradient(90deg, transparent, var(--seg-secundaria), transparent); animation: varrer 1.4s linear infinite; }
+    .agente.trabalhando .avatar::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--seg-secundaria); animation: pulso 1.2s ease-out infinite; }
+    .agente.trabalhando::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--seg-secundaria), transparent); animation: varrer 1.4s linear infinite; }
     .agente.pronto .estado { color: var(--seg-secundaria); }
     .pontos span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-left: 2px; animation: ponto 1s infinite; }
     .pontos span:nth-child(2) { animation-delay: .15s; } .pontos span:nth-child(3) { animation-delay: .3s; }
@@ -132,13 +108,11 @@
     .msg.eu { align-self: flex-end; background: var(--seg-primaria); color: var(--inteli-branco); }
     .msg.agente-msg { align-self: flex-start; background: var(--seg-superficie); border-left: 4px solid var(--seg-primaria); }
     .msg.agente-msg[data-agente=vera] { border-left-color: var(--seg-secundaria); }
-    .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base);
-      border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
+    .msg.agente-msg[data-agente=ciro] { border-left-color: var(--seg-destaque); background: var(--seg-base); border-top: 1px solid var(--seg-borda); border-right: 1px solid var(--seg-borda); border-bottom: 1px solid var(--seg-borda); }
     .msg.agente-msg[data-agente=guardiao], .msg.agente-msg[data-agente=guardião] { border-left-color: var(--inteli-coral); }
     .msg .quem { display: flex; gap: 6px; align-items: center; font-weight: 700; font-size: 13px; margin-bottom: 4px; white-space: normal; }
     .msg .quem small { font-weight: 500; }
-    .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto;
-            background: var(--seg-secundaria); color: var(--inteli-branco); }
+    .selo { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 8px; margin-left: auto; background: var(--seg-secundaria); color: var(--inteli-branco); }
     .selo.corrigido { background: var(--seg-destaque); }
     .msg.aviso { align-self: center; font-size: 13px; background: transparent; padding: 4px; text-align: center; }
     .msg.rodape { align-self: flex-start; font-size: 12px; padding: 0 2px; }
@@ -222,8 +196,8 @@
           <p class="legenda">Clique numa conta para perguntar à equipe sobre ela. Barra vermelha à esquerda: conta marcada como perdida no case.</p>
         </div>
       </section>
-      
-      <!-- INÍCIO DO NOVO BLOCO 02: PLANOS DE AÇÃO E PERSONAS -->
+
+      <!-- BLOCO 02: PLANOS DE AÇÃO E PERSONAS -->
       <section class="bloco" id="bloco-planos">
         <h2><span class="num">02</span>Planos de ação e Personas (Fixos)</h2>
         <p class="ajuda">A Vera, estrategista da equipe, analisará as contas baseada nos SLAs por persona e nos planos abaixo.</p>
@@ -263,7 +237,6 @@
         </div>
         <div class="linha"><span class="status">Estes planos são fixos e enviados automaticamente à equipe de agentes.</span></div>
       </section>
-      <!-- FIM DO NOVO BLOCO 02 -->
 
       <section class="bloco" id="bloco-conexao">
         <h2><span class="num">03</span>Conexão com a equipe no n8n</h2>
@@ -328,7 +301,6 @@
   (function () {
     "use strict";
 
-    // ---- NOVA LÓGICA DE PLANOS FIXOS ----
     var PLANOS_FIXOS = {
       comercial: "1. Contas P1 (Champions Recorrentes): Ao atingir o Dia 30 sem nova compra, acionar o Account Manager (KAM) para atendimento dedicado e agendamento/revisão da QBR (Quarterly Business Review) Executiva Trimestral.\n2. Contas P2 (Grandes Projetos Capex): Ao atingir o Dia 150 (aprox. 5 meses) desde o último grande projeto, iniciar o mapeamento comercial do próximo ciclo de orçamento de TI da conta.\n3. Nenhuma condição comercial ou tempo de vendedor deve ser alocado para contas P4 fora do modelo self-service.",
       atendimento: "1. Contas P3 (Pequenos Recorrentes): Ao atingir o Dia 90 sem compra, acionar automação via CRM para envio de ofertas casadas (cross-sell de periféricos), visando converter o cliente de monocesta para multicesta e mitigar o alto risco de churn (64,8%).\n2. Contas P4 (Transacionais de Cauda): Ao atingir o Dia 180 de inatividade, acionar fluxo de nurturing 100% digital e redirecionar o cliente para o canal de e-commerce B2B self-service (não alocar tempo de vendedor para atendimento ativo).\n3. Registrar no CRM todo o resultado das automações das contas P3 e interações no portal digital das contas P4.",
@@ -362,7 +334,6 @@
       \$("t3").classList.toggle("feito", \$("status-conexao").classList.contains("ok"));
     }
 
-    // ---- 01 planilha e modelo
     function etapa(nome, estado) {
       var li = document.querySelector('#etapas li[data-e="' + nome + '"]');
       li.className = estado;
@@ -460,7 +431,7 @@
         valor_esperado_fila: fila.reduce(function (a, c) { return a + c.valor_esperado; }, 0)
       };
       
-      window.KOVAN = resultado;   // para o teste e para quem quiser inspecionar no console
+      window.KOVAN = resultado;
       KovanModelo.guardar(KovanModelo.contexto(resultado));
       var r = resultado;
       
@@ -577,7 +548,6 @@
     function contexto() { return KovanModelo.contexto(resultado); }
     window.KovanContexto = function () { return resultado ? contexto() : null; };
 
-    // ---- 02 planos: AGORA RETORNA APENAS OS FIXOS
     function planos() {
       return { 
         comercial: PLANOS_FIXOS.comercial, 
@@ -594,7 +564,6 @@
       });
     });
 
-    // ---- modelo de linguagem
     var sel = $("modelo-llm");
     var salvo = ler("kovan-modelo-llm");
     if (salvo && sel.querySelector('option[value="' + salvo + '"]')) sel.value = salvo;
@@ -605,7 +574,6 @@
     $("modelo-outro").addEventListener("change", function () { gravar("kovan-modelo-outro", this.value.trim()); });
     function modeloLLM() { return sel.value === "outro" ? $("modelo-outro").value.trim() : sel.value; }
 
-    // ---- 03 conexão
     $("endpoint").value = ler("kovan-endpoint") || "";
     $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
     function chamar(pergunta) {
@@ -630,7 +598,6 @@
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
-    // ---- 04 a equipe
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
       el.classList.remove("trabalhando", "pronto");
@@ -640,9 +607,6 @@
       else rotulo.textContent = "aguardando";
     }
     
-    /* O n8n devolve a resposta dos três de uma vez. Enquanto ela não chega, o
-       painel acende o agente que provavelmente está trabalhando: a ordem é a
-       do workflow, o tempo de cada um é estimativa. */
     function animarEquipe() {
       var i = 0;
       AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
